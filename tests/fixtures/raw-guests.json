@@ -1,0 +1,15 @@
+[
+  {
+    "row": 4,
+    "dateRaw": "08/13/2026",
+    "player": "Allan",
+    "result": "Win",
+    "playerBP": 100,
+    "oppBP": 56,
+    "playerFaction": "Ad Mech",
+    "oppFaction": "Necrons",
+    "guestName": "Graeme",
+    "guestElo": null,
+    "notes": null
+  }
+]

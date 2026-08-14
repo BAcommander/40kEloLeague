@@ -1,0 +1,112 @@
+[
+  {
+    "name": "Miles",
+    "elo": 1012,
+    "peak": 1032,
+    "games": 5,
+    "wins": 3,
+    "draws": 0,
+    "losses": 2,
+    "bp": 424,
+    "winPct": 0.6
+  },
+  {
+    "name": "Andrew",
+    "elo": 1011,
+    "peak": 1011,
+    "games": 13,
+    "wins": 6,
+    "draws": 0,
+    "losses": 7,
+    "bp": 1053,
+    "winPct": 0.46153846153846156
+  },
+  {
+    "name": "Colin",
+    "elo": 985,
+    "peak": 1029,
+    "games": 16,
+    "wins": 7,
+    "draws": 1,
+    "losses": 8,
+    "bp": 1339,
+    "winPct": 0.4375
+  },
+  {
+    "name": "John",
+    "elo": 1072,
+    "peak": 1072,
+    "games": 11,
+    "wins": 7,
+    "draws": 1,
+    "losses": 3,
+    "bp": 937,
+    "winPct": 0.6363636363636364
+  },
+  {
+    "name": "Brett",
+    "elo": 958,
+    "peak": 1000,
+    "games": 5,
+    "wins": 1,
+    "draws": 0,
+    "losses": 4,
+    "bp": 347,
+    "winPct": 0.2
+  },
+  {
+    "name": "Allan",
+    "elo": 1017,
+    "peak": 1017,
+    "games": 2,
+    "wins": 2,
+    "draws": 0,
+    "losses": 0,
+    "bp": 187,
+    "winPct": 1
+  },
+  {
+    "name": "Kev",
+    "elo": 957,
+    "peak": 1000,
+    "games": 3,
+    "wins": 0,
+    "draws": 0,
+    "losses": 3,
+    "bp": 135,
+    "winPct": 0
+  },
+  {
+    "name": "Gav",
+    "elo": 1019,
+    "peak": 1037,
+    "games": 7,
+    "wins": 4,
+    "draws": 0,
+    "losses": 3,
+    "bp": 539,
+    "winPct": 0.5714285714285714
+  },
+  {
+    "name": "Ryan",
+    "elo": 1016,
+    "peak": 1016,
+    "games": 1,
+    "wins": 1,
+    "draws": 0,
+    "losses": 0,
+    "bp": 58,
+    "winPct": 1
+  },
+  {
+    "name": "Pete",
+    "elo": 1015,
+    "peak": 1015,
+    "games": 1,
+    "wins": 1,
+    "draws": 0,
+    "losses": 0,
+    "bp": 40,
+    "winPct": 1
+  }
+]
