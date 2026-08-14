@@ -1,7 +1,7 @@
 {
   "name": "pkh-league",
   "productName": "PKH League",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Warhammer 40K ELO League tracker",
   "main": "out/main/index.js",
   "author": "PKH League",
