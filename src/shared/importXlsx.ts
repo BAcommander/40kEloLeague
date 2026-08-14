@@ -20,6 +20,9 @@ import type {
  *  - player/faction names are trimmed and whitespace-collapsed (the sheet had a
  *    phantom "Andrew  " player from trailing spaces)
  *  - dates entered as text (e.g. "08/13/2026") are parsed; numeric Excel serials too
+ *  - dates were typed US-style (mm/dd) but UK-locale Excel read some as dd/mm and
+ *    stored the wrong serial; any imported date in the future gets its day/month
+ *    swapped back when that lands in the past, and is flagged for confirmation
  */
 
 export type { ImportDiff, ImportReport }
@@ -49,7 +52,8 @@ function parseNum(v: unknown): number | undefined {
 
 /**
  * Accepts an Excel serial number, an ISO string, or a slash-format text date.
- * Slash dates: unambiguous month position wins; ambiguous ones assume dd/mm/yyyy (UK).
+ * Slash dates: unambiguous month position wins; ambiguous ones assume mm/dd/yyyy —
+ * the league's dates were typed US-style (confirmed against the real workbook).
  */
 export function parseDate(v: unknown): string | null {
   if (typeof v === 'number' && Number.isFinite(v) && v > 20000 && v < 80000) {
@@ -63,12 +67,12 @@ export function parseDate(v: unknown): string | null {
     const b = Number(m[2])
     const year = Number(m[3])
     let day: number, month: number
-    if (b > 12 && a <= 12) {
-      month = a
-      day = b // e.g. "08/13/2026" — must be US mm/dd
-    } else {
+    if (a > 12 && b <= 12) {
       day = a
-      month = b // UK default, also covers a>12
+      month = b // e.g. "13/08/2026" — must be UK dd/mm
+    } else {
+      month = a
+      day = b // US default (covers unambiguous "08/13/2026" and ambiguous dates)
     }
     if (month < 1 || month > 12 || day < 1 || day > 31) return null
     return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
@@ -93,9 +97,38 @@ function isDataRow(row: Row): boolean {
   return parseDate(first) !== null
 }
 
-export function importWorkbook(buffer: ArrayBuffer | Uint8Array): ImportResult {
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+const prettyDate = (iso: string): string => {
+  const [y, m, d] = iso.split('-').map(Number)
+  return `${d} ${MONTHS[m - 1]} ${y}`
+}
+
+export function importWorkbook(
+  buffer: ArrayBuffer | Uint8Array,
+  opts: { today?: string } = {}
+): ImportResult {
   const wb = XLSX.read(buffer, { type: 'array' })
   const notes: string[] = []
+  const today = opts.today ?? new Date().toISOString().slice(0, 10)
+
+  // Results can't be from the future — a future date means Excel read a US-typed
+  // date as dd/mm and stored the wrong serial. Swap day/month back when that lands
+  // in the past; either way flag the row for confirmation in the import report.
+  const fixFutureDates = <T extends { date: string; seq: number }>(list: T[], sheet: string): void => {
+    for (const e of list) {
+      if (e.date <= today) continue
+      const [y, mo, dy] = e.date.split('-')
+      const swapped = Number(dy) <= 12 ? `${y}-${dy}-${mo}` : null
+      if (swapped && swapped <= today) {
+        notes.push(
+          `${sheet} row ${e.seq}: date read as ${prettyDate(e.date)} — that's in the future, so it was corrected to ${prettyDate(swapped)} (US-style day/month mix-up). Please confirm.`
+        )
+        e.date = swapped
+      } else {
+        notes.push(`${sheet} row ${e.seq}: date ${prettyDate(e.date)} is in the future — please check it.`)
+      }
+    }
+  }
 
   const playerIds = new Map<string, string>() // lower-cased name -> id
   const players: Player[] = []
@@ -193,6 +226,10 @@ export function importWorkbook(buffer: ArrayBuffer | Uint8Array): ImportResult {
       seq: i + 1
     })
   }
+
+  fixFutureDates(matches, 'Match Log')
+  fixFutureDates(tournamentEntries, 'Tournament Log')
+  fixFutureDates(guestGames, 'Guest Log')
 
   const season: Season = {
     id: 'season-1',

@@ -16,6 +16,8 @@ export interface MatchGame {
   bp2?: number
   faction1?: string
   faction2?: string
+  disposition1?: string
+  disposition2?: string
   notes?: string
   /** Stable entry order; replicates the spreadsheet's row-based tie-break within a day. */
   seq: number
@@ -35,6 +37,7 @@ export interface TournamentEntry {
   /** Strength of schedule, 0..1. Phantom opponent ELO = round(800 + sos*400). */
   sos: number
   faction?: string
+  disposition?: string
   notes?: string
   seq: number
 }
@@ -49,6 +52,7 @@ export interface GuestGame {
   oppBP?: number
   playerFaction?: string
   oppFaction?: string
+  playerDisposition?: string
   guestName: string
   guestElo?: number // defaults to 1000
   notes?: string
@@ -61,6 +65,8 @@ export interface Season {
   archived?: boolean
   /** Per-player starting ELO overrides (e.g. carry-over from a previous season). */
   startingElos?: Record<string, number>
+  /** Games needed to appear in the ranked league table (default 2); fewer = provisional. */
+  minRankedGames?: number
   players: Player[]
   matches: MatchGame[]
   tournamentEntries: TournamentEntry[]
@@ -125,12 +131,15 @@ export interface TimelineEvent {
   result?: GameResult
   faction?: string
   opponentFaction?: string
+  disposition?: string
 }
 
 export interface PlayerStats {
   playerId: string
   name: string
+  /** 0 while provisional (below the season's minimum ranked games). */
   rank: number
+  provisional: boolean
   elo: number
   peakElo: number
   games: number
@@ -153,6 +162,17 @@ export interface FactionStats {
   players: string[] // player names who fielded it
 }
 
+/** Player-agnostic W/D/L record of an army disposition across all recorded games. */
+export interface DispositionStats {
+  disposition: string
+  games: number
+  wins: number
+  draws: number
+  losses: number
+  winPct: number
+  players: string[] // player names who ran it
+}
+
 export interface HeadToHeadCell {
   wins: number
   draws: number
@@ -165,6 +185,7 @@ export interface SeasonComputation {
   /** playerId -> [{date, elo}] starting with the initial rating. */
   eloHistory: Record<string, { date: string; elo: number; label: string }[]>
   factionStats: FactionStats[]
+  dispositionStats: DispositionStats[]
   /** headToHead[playerIdA][playerIdB] = A's record vs B (matches only). */
   headToHead: Record<string, Record<string, HeadToHeadCell>>
 }

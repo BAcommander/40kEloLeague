@@ -7,7 +7,8 @@ import { computeSeason } from '../src/shared/engine'
 const wb = new Uint8Array(readFileSync(resolve(__dirname, 'fixtures/W40K_ELO_League_v2.xlsx')))
 
 describe('xlsx import round-trip', () => {
-  const { season, report } = importWorkbook(wb)
+  // Fixed "today" so the future-date repair is deterministic in tests.
+  const { season, report } = importWorkbook(wb, { today: '2026-08-14' })
 
   it('imports every raw log row', () => {
     expect(report.matches).toBe(26)
@@ -19,6 +20,16 @@ describe('xlsx import round-trip', () => {
   it('repairs the text-date guest row and notes it', () => {
     expect(season.guestGames[0].date).toBe('2026-08-13')
     expect(report.notes.some((n) => n.includes('08/13/2026'))).toBe(true)
+  })
+
+  it('swaps day/month on future dates Excel misread from US-format entry', () => {
+    const byId = Object.fromEntries(season.matches.map((m) => [m.id, m.date]))
+    expect(byId['m-25']).toBe('2026-08-09') // was stored as 8 Sep 2026
+    expect(byId['m-26']).toBe('2026-08-11') // was 8 Nov 2026
+    expect(byId['m-27']).toBe('2026-08-11') // was 8 Nov 2026
+    expect(byId['m-28']).toBe('2026-08-12') // was 8 Dec 2026 (John vs Brett)
+    expect(report.notes.filter((n) => n.includes('Please confirm')).length).toBe(4)
+    expect(season.matches.every((m) => m.date <= '2026-08-14')).toBe(true)
   })
 
   it('produces the corrected league table', () => {
@@ -45,7 +56,7 @@ describe('parseDate', () => {
     expect(parseDate('2026-08-13')).toBe('2026-08-13')
     expect(parseDate('08/13/2026')).toBe('2026-08-13') // month position forced by 13
     expect(parseDate('13/08/2026')).toBe('2026-08-13')
-    expect(parseDate('01/02/2026')).toBe('2026-02-01') // ambiguous -> UK dd/mm
+    expect(parseDate('01/02/2026')).toBe('2026-01-02') // ambiguous -> US mm/dd (league types US-style)
     expect(parseDate('not a date')).toBe(null)
   })
 })

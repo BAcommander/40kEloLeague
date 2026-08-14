@@ -317,7 +317,7 @@
         },
         {
           "id": "m-25",
-          "date": "2026-09-08",
+          "date": "2026-08-09",
           "p1": "p-colin",
           "p2": "p-miles",
           "result": "Win",
@@ -329,7 +329,7 @@
         },
         {
           "id": "m-26",
-          "date": "2026-11-08",
+          "date": "2026-08-11",
           "p1": "p-colin",
           "p2": "p-andrew",
           "result": "Win",
@@ -341,7 +341,7 @@
         },
         {
           "id": "m-27",
-          "date": "2026-11-08",
+          "date": "2026-08-11",
           "p1": "p-gav",
           "p2": "p-miles",
           "result": "Loss",
@@ -353,7 +353,7 @@
         },
         {
           "id": "m-28",
-          "date": "2026-12-08",
+          "date": "2026-08-12",
           "p1": "p-john",
           "p2": "p-brett",
           "result": "Win",
@@ -425,7 +425,7 @@
     }
   ],
   "importReport": {
-    "importedAt": "2026-08-14T16:56:40.615Z",
+    "importedAt": "2026-08-14T22:13:00.362Z",
     "matches": 26,
     "tournamentEntries": 3,
     "guestGames": 1,
@@ -493,7 +493,11 @@
       }
     ],
     "notes": [
-      "Guest Log row 4: date was stored as text \"08/13/2026\" — parsed as 2026-08-13 (this row previously broke the spreadsheet)"
+      "Guest Log row 4: date was stored as text \"08/13/2026\" — parsed as 2026-08-13 (this row previously broke the spreadsheet)",
+      "Match Log row 25: date read as 8 Sep 2026 — that's in the future, so it was corrected to 9 Aug 2026 (US-style day/month mix-up). Please confirm.",
+      "Match Log row 26: date read as 8 Nov 2026 — that's in the future, so it was corrected to 11 Aug 2026 (US-style day/month mix-up). Please confirm.",
+      "Match Log row 27: date read as 8 Nov 2026 — that's in the future, so it was corrected to 11 Aug 2026 (US-style day/month mix-up). Please confirm.",
+      "Match Log row 28: date read as 8 Dec 2026 — that's in the future, so it was corrected to 12 Aug 2026 (US-style day/month mix-up). Please confirm."
     ]
   }
 }

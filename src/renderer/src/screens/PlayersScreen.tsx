@@ -96,7 +96,9 @@ export default function PlayersScreen(): JSX.Element {
                     {p.rank === 1 ? '♔ ' : ''}
                     {p.name}
                   </span>
-                  <span style={{ color: 'var(--ink-3)', fontSize: 12 }}>#{p.rank}</span>
+                  <span style={{ color: 'var(--ink-3)', fontSize: 12 }}>
+                    {p.provisional ? 'provisional' : `#${p.rank}`}
+                  </span>
                 </>
               )}
             </div>

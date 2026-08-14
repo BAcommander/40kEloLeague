@@ -136,6 +136,20 @@ export default function ChartsScreen(): JSX.Element {
     [comp.factionStats]
   )
 
+  // ---- Disposition results (player-agnostic W/D/L per disposition) ----
+  const dispositionData = useMemo(
+    () =>
+      comp.dispositionStats.map((d) => ({
+        name: d.disposition,
+        Wins: d.wins,
+        Draws: d.draws,
+        Losses: d.losses,
+        winPct: Math.round(d.winPct * 100),
+        games: d.games
+      })),
+    [comp.dispositionStats]
+  )
+
   // ---- W/D/L ----
   const wdlData = useMemo(
     () =>
@@ -356,6 +370,45 @@ export default function ChartsScreen(): JSX.Element {
             <span className="key"><span className="swatch" style={{ background: WDL.draw }} />Draws</span>
             <span className="key"><span className="swatch" style={{ background: WDL.loss }} />Losses</span>
           </div>
+        </ChartCard>
+
+        <ChartCard
+          title="Disposition results"
+          hint="Wins, draws and losses per disposition, across all players and game types."
+          exportName="disposition-results"
+        >
+          {dispositionData.length === 0 ? (
+            <p className="hint" style={{ padding: '18px 0 8px' }}>
+              No dispositions recorded yet — add them alongside the faction when saving a result, and this chart
+              tracks how each disposition performs regardless of who runs it.
+            </p>
+          ) : (
+            <>
+              <ResponsiveContainer width="100%" height={Math.max(200, dispositionData.length * 34 + 40)}>
+                <BarChart data={dispositionData} layout="vertical" margin={{ top: 4, right: 40, bottom: 4, left: 30 }}>
+                  <CartesianGrid stroke={GRID} strokeWidth={1} horizontal={false} />
+                  <XAxis type="number" allowDecimals={false} stroke={GRID} tick={{ fill: INK3, fontSize: 11.5 }} />
+                  <YAxis type="category" dataKey="name" width={130} stroke={GRID} tick={{ fill: INK2, fontSize: 12.5 }} />
+                  <Tooltip
+                    contentStyle={tooltipStyle}
+                    cursor={{ fill: 'rgba(255,255,255,0.04)' }}
+                    labelFormatter={(name, payload) => {
+                      const row = payload?.[0]?.payload
+                      return row ? `${name} — ${row.winPct}% wins · ${row.games} games` : name
+                    }}
+                  />
+                  <Bar dataKey="Wins" stackId="a" fill={WDL.win} barSize={18} stroke={SURFACE} strokeWidth={1} isAnimationActive={false} />
+                  <Bar dataKey="Draws" stackId="a" fill={WDL.draw} barSize={18} stroke={SURFACE} strokeWidth={1} isAnimationActive={false} />
+                  <Bar dataKey="Losses" stackId="a" fill={WDL.loss} barSize={18} radius={[0, 4, 4, 0]} stroke={SURFACE} strokeWidth={1} isAnimationActive={false} />
+                </BarChart>
+              </ResponsiveContainer>
+              <div className="legend-row">
+                <span className="key"><span className="swatch" style={{ background: WDL.win }} />Wins</span>
+                <span className="key"><span className="swatch" style={{ background: WDL.draw }} />Draws</span>
+                <span className="key"><span className="swatch" style={{ background: WDL.loss }} />Losses</span>
+              </div>
+            </>
+          )}
         </ChartCard>
 
         <ChartCard

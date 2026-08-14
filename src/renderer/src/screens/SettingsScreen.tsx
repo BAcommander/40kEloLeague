@@ -3,7 +3,7 @@ import type { ImportReport, LeagueData, Season } from '@shared/types'
 import { computeSeason, DEFAULT_START_ELO, excelRound } from '@shared/engine'
 import { useApp } from '../App'
 import { api } from '../api'
-import { fmtDate, uid } from '../lib'
+import { fmtDate, uid, updateSeason } from '../lib'
 
 function ReportView({ report }: { report: ImportReport }): JSX.Element {
   return (
@@ -68,6 +68,14 @@ export default function SettingsScreen(): JSX.Element {
     toast('League name updated')
   }
 
+  const [minRanked, setMinRanked] = useState(String(season.minRankedGames ?? 2))
+  const saveMinRanked = (): void => {
+    const n = Math.max(1, Math.round(Number(minRanked) || 2))
+    mutate((d) => updateSeason(d, season.id, (s) => ({ ...s, minRankedGames: n })))
+    setMinRanked(String(n))
+    toast(`Players now need ${n} game${n === 1 ? '' : 's'} to appear in the rankings`)
+  }
+
   const exportJson = async (): Promise<void> => {
     const path = await api.exportFile(data)
     if (path) toast(`Backup exported:\n${path}`)
@@ -126,6 +134,7 @@ export default function SettingsScreen(): JSX.Element {
       name: nsName.trim() || `Season ${data.seasons.length + 1}`,
       players: season.players.map((p) => ({ ...p })),
       startingElos: nsMode === 'carry' ? startingElos : undefined,
+      minRankedGames: season.minRankedGames,
       matches: [],
       tournamentEntries: [],
       guestGames: []
@@ -159,6 +168,25 @@ export default function SettingsScreen(): JSX.Element {
             </div>
             <input value={leagueName} onChange={(e) => setLeagueName(e.target.value)} style={{ width: 240 }} />
             <button className="btn small" onClick={saveLeagueName}>
+              Save
+            </button>
+          </div>
+          <div className="setting-item" style={{ marginTop: 12 }}>
+            <div className="grow">
+              <div className="name">Minimum games to be ranked</div>
+              <div className="desc">
+                Players with fewer games show as provisional below the table — a single win can't claim mid-table.
+                Applies to {season.name}.
+              </div>
+            </div>
+            <input
+              type="number"
+              min={1}
+              value={minRanked}
+              onChange={(e) => setMinRanked(e.target.value)}
+              style={{ width: 80 }}
+            />
+            <button className="btn small" onClick={saveMinRanked}>
               Save
             </button>
           </div>

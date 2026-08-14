@@ -195,3 +195,55 @@ describe('Fixed data (normalized names + guest game restored)', () => {
     expect(andrew.losses).toBe(9)
   })
 })
+
+describe('Ranking eligibility (minimum games) and disposition stats', () => {
+  const mini: Season = {
+    id: 's-mini',
+    name: 'Mini',
+    players: [
+      { id: 'a', name: 'A' },
+      { id: 'b', name: 'B' },
+      { id: 'c', name: 'C' }
+    ],
+    matches: [
+      { id: 'm1', date: '2026-01-01', p1: 'a', p2: 'b', result: 'Win', seq: 1, disposition1: 'Gladius', disposition2: 'Bully Boyz' },
+      { id: 'm2', date: '2026-01-02', p1: 'a', p2: 'b', result: 'Loss', seq: 2, disposition1: 'Gladius' },
+      { id: 'm3', date: '2026-01-03', p1: 'c', p2: 'a', result: 'Win', seq: 3, disposition1: 'Bully Boyz' }
+    ],
+    tournamentEntries: [],
+    guestGames: []
+  }
+
+  it('players under the default 2-game minimum are provisional and unranked', () => {
+    const { table } = computeSeason(mini)
+    const c = table.find((p) => p.name === 'C')!
+    expect(c.games).toBe(1)
+    expect(c.provisional).toBe(true)
+    expect(c.rank).toBe(0)
+    // Despite winning their only game (ELO 1016), C claims no table position.
+    expect(c.elo).toBe(1016)
+  })
+
+  it('qualified players get consecutive ranks with no gaps', () => {
+    const { table } = computeSeason(mini)
+    const ranked = table.filter((p) => !p.provisional)
+    expect(ranked.map((p) => p.rank)).toEqual([1, 2])
+    expect(ranked.every((p) => p.games >= 2)).toBe(true)
+  })
+
+  it('respects a per-season minRankedGames override', () => {
+    const { table } = computeSeason({ ...mini, minRankedGames: 1 })
+    expect(table.every((p) => !p.provisional)).toBe(true)
+    expect(table.map((p) => p.rank)).toEqual([1, 2, 3])
+  })
+
+  it('aggregates disposition W/D/L player-agnostically across both sides', () => {
+    const { dispositionStats } = computeSeason(mini)
+    const byName = Object.fromEntries(dispositionStats.map((d) => [d.disposition, d]))
+    // Gladius: A won m1 and lost m2 with it.
+    expect(byName['Gladius']).toMatchObject({ games: 2, wins: 1, draws: 0, losses: 1 })
+    // Bully Boyz: B lost m1 with it, C won m3 with it — two different players, one stat.
+    expect(byName['Bully Boyz']).toMatchObject({ games: 2, wins: 1, draws: 0, losses: 1 })
+    expect(byName['Bully Boyz'].players.sort()).toEqual(['B', 'C'])
+  })
+})

@@ -4,6 +4,7 @@ import type {
   TimelineEvent,
   PlayerStats,
   FactionStats,
+  DispositionStats,
   HeadToHeadCell,
   GameResult
 } from './types'
@@ -16,6 +17,8 @@ import type {
 export const DEFAULT_START_ELO = 1000
 export const MATCH_K = 32
 export const TOURNAMENT_K_CAP = 96
+/** Games needed before a player appears in the ranked table (per-season override on Season). */
+export const DEFAULT_MIN_RANKED_GAMES = 2
 
 /** Excel's ROUND: half away from zero (JS Math.round rounds -16.5 to -16, Excel to -17). */
 export function excelRound(x: number, dp = 0): number {
@@ -124,7 +127,8 @@ export function computeSeason(season: Season): SeasonComputation {
         opponentEloAfter: oppAfter,
         result: m.result,
         faction: m.faction1,
-        opponentFaction: m.faction2
+        opponentFaction: m.faction2,
+        disposition: m.disposition1
       })
     } else if (ev.type === 'Tournament') {
       const { t } = ev
@@ -151,7 +155,8 @@ export function computeSeason(season: Season): SeasonComputation {
         kFactor: k,
         delta,
         eloAfter: after,
-        faction: t.faction
+        faction: t.faction,
+        disposition: t.disposition
       })
     } else {
       const { g } = ev
@@ -179,7 +184,8 @@ export function computeSeason(season: Season): SeasonComputation {
         eloAfter: after,
         result: g.result,
         faction: g.playerFaction,
-        opponentFaction: g.oppFaction
+        opponentFaction: g.oppFaction,
+        disposition: g.playerDisposition
       })
     }
   }
@@ -236,6 +242,7 @@ export function computeSeason(season: Season): SeasonComputation {
       playerId: p.id,
       name: p.name,
       rank: 0,
+      provisional: false,
       elo: current(p.id),
       peakElo: peak,
       games,
@@ -253,7 +260,14 @@ export function computeSeason(season: Season): SeasonComputation {
   table.sort(
     (a, b) => b.elo - a.elo || b.avgBp - a.avgBp || a.name.localeCompare(b.name)
   )
-  table.forEach((s, i) => (s.rank = i + 1))
+  // Players below the season's minimum games are provisional: still listed and
+  // fully computed, but unranked (rank 0) so a single result can't claim mid-table.
+  const minGames = season.minRankedGames ?? DEFAULT_MIN_RANKED_GAMES
+  let nextRank = 1
+  for (const s of table) {
+    s.provisional = s.games < minGames
+    s.rank = s.provisional ? 0 : nextRank++
+  }
 
   // ---- ELO history per player ----
   const eloHistory: SeasonComputation['eloHistory'] = {}
@@ -276,44 +290,76 @@ export function computeSeason(season: Season): SeasonComputation {
     }
   }
 
-  // ---- Faction stats (league players' factions only) ----
-  const factions = new Map<string, FactionStats>()
-  const bump = (
-    faction: string | undefined,
-    playerName: string,
-    w: number,
-    d: number,
-    l: number
-  ): void => {
-    const name = faction?.trim()
-    if (!name) return
-    let f = factions.get(name)
-    if (!f) {
-      f = { faction: name, games: 0, wins: 0, draws: 0, losses: 0, winPct: 0, players: [] }
-      factions.set(name, f)
-    }
-    f.games += w + d + l
-    f.wins += w
-    f.draws += d
-    f.losses += l
-    if (!f.players.includes(playerName)) f.players.push(playerName)
+  // ---- Faction & disposition stats (league players' sides only) ----
+  interface WdlAcc {
+    games: number
+    wins: number
+    draws: number
+    losses: number
+    winPct: number
+    players: string[]
   }
+  const makeAccumulator = (): {
+    bump: (key: string | undefined, playerName: string, w: number, d: number, l: number) => void
+    finish: () => Map<string, WdlAcc>
+  } => {
+    const map = new Map<string, WdlAcc>()
+    return {
+      bump: (key, playerName, w, d, l): void => {
+        const name = key?.trim()
+        if (!name) return
+        let f = map.get(name)
+        if (!f) {
+          f = { games: 0, wins: 0, draws: 0, losses: 0, winPct: 0, players: [] }
+          map.set(name, f)
+        }
+        f.games += w + d + l
+        f.wins += w
+        f.draws += d
+        f.losses += l
+        if (!f.players.includes(playerName)) f.players.push(playerName)
+      },
+      finish: (): Map<string, WdlAcc> => {
+        for (const f of map.values()) f.winPct = f.games === 0 ? 0 : f.wins / f.games
+        return map
+      }
+    }
+  }
+  const factionAcc = makeAccumulator()
+  const dispositionAcc = makeAccumulator()
   for (const m of season.matches) {
     const p1 = nameOf.get(m.p1) ?? m.p1
     const p2 = nameOf.get(m.p2) ?? m.p2
-    bump(m.faction1, p1, m.result === 'Win' ? 1 : 0, m.result === 'Draw' ? 1 : 0, m.result === 'Loss' ? 1 : 0)
-    bump(m.faction2, p2, m.result === 'Loss' ? 1 : 0, m.result === 'Draw' ? 1 : 0, m.result === 'Win' ? 1 : 0)
+    const w1 = m.result === 'Win' ? 1 : 0
+    const d1 = m.result === 'Draw' ? 1 : 0
+    const l1 = m.result === 'Loss' ? 1 : 0
+    factionAcc.bump(m.faction1, p1, w1, d1, l1)
+    factionAcc.bump(m.faction2, p2, l1, d1, w1)
+    dispositionAcc.bump(m.disposition1, p1, w1, d1, l1)
+    dispositionAcc.bump(m.disposition2, p2, l1, d1, w1)
   }
   for (const t of season.tournamentEntries) {
-    bump(t.faction, nameOf.get(t.player) ?? t.player, t.wins, t.draws, t.losses)
+    const p = nameOf.get(t.player) ?? t.player
+    factionAcc.bump(t.faction, p, t.wins, t.draws, t.losses)
+    dispositionAcc.bump(t.disposition, p, t.wins, t.draws, t.losses)
   }
   for (const g of season.guestGames) {
     const p = nameOf.get(g.player) ?? g.player
-    bump(g.playerFaction, p, g.result === 'Win' ? 1 : 0, g.result === 'Draw' ? 1 : 0, g.result === 'Loss' ? 1 : 0)
+    const w = g.result === 'Win' ? 1 : 0
+    const d = g.result === 'Draw' ? 1 : 0
+    const l = g.result === 'Loss' ? 1 : 0
+    factionAcc.bump(g.playerFaction, p, w, d, l)
+    dispositionAcc.bump(g.playerDisposition, p, w, d, l)
   }
-  const factionStats = [...factions.values()]
-  for (const f of factionStats) f.winPct = f.games === 0 ? 0 : f.wins / f.games
+  const factionStats: FactionStats[] = [...factionAcc.finish()].map(([faction, s]) => ({
+    faction,
+    ...s
+  }))
   factionStats.sort((a, b) => b.games - a.games || a.faction.localeCompare(b.faction))
+  const dispositionStats: DispositionStats[] = [...dispositionAcc.finish()].map(
+    ([disposition, s]) => ({ disposition, ...s })
+  )
+  dispositionStats.sort((a, b) => b.games - a.games || a.disposition.localeCompare(b.disposition))
 
   // ---- Head-to-head (matches only) ----
   const headToHead: Record<string, Record<string, HeadToHeadCell>> = {}
@@ -335,5 +381,5 @@ export function computeSeason(season: Season): SeasonComputation {
     }
   }
 
-  return { timeline, table, eloHistory, factionStats, headToHead }
+  return { timeline, table, eloHistory, factionStats, dispositionStats, headToHead }
 }

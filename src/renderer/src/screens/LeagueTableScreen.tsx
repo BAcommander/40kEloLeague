@@ -34,8 +34,10 @@ export default function LeagueTableScreen(): JSX.Element {
     return new Map(computeSeason(prev).table.map((p) => [p.playerId, p.rank]))
   }, [season, comp])
 
-  const played = comp.table.filter((p) => p.games > 0)
+  const ranked = comp.table.filter((p) => !p.provisional)
+  const provisional = comp.table.filter((p) => p.provisional && p.games > 0)
   const unplayed = comp.table.filter((p) => p.games === 0)
+  const minGames = season.minRankedGames ?? 2
 
   const renderPng = async (): Promise<string | null> => {
     if (!cardRef.current) return null
@@ -96,9 +98,10 @@ export default function LeagueTableScreen(): JSX.Element {
             </tr>
           </thead>
           <tbody>
-            {played.map((p) => {
+            {ranked.map((p) => {
               const prev = prevRanks.get(p.playerId)
-              const move = prev === undefined ? 0 : prev - p.rank
+              // No arrow for players who were provisional (rank 0) before this event.
+              const move = !prev ? 0 : prev - p.rank
               return (
                 <tr key={p.playerId}>
                   <td>
@@ -124,8 +127,31 @@ export default function LeagueTableScreen(): JSX.Element {
                 </tr>
               )
             })}
+            {provisional.map((p) => (
+              <tr key={p.playerId} style={{ opacity: 0.62 }}>
+                <td>
+                  <span className="rank-cell" style={{ fontSize: 11, letterSpacing: '0.04em' }}>PROV</span>
+                </td>
+                <td className="player-name">{p.name}</td>
+                <td />
+                <td className="elo-cell">{p.elo}</td>
+                <td>{p.peakElo}</td>
+                <td>{p.games}</td>
+                <td>{p.wins}</td>
+                <td>{p.draws}</td>
+                <td>{p.losses}</td>
+                <td>{fmtPct(p.winPct)}</td>
+                <td>{p.bp}</td>
+                <td>{p.tournamentsPlayed}</td>
+              </tr>
+            ))}
           </tbody>
         </table>
+        {provisional.length > 0 && (
+          <div style={{ padding: '10px 14px 0', color: 'var(--ink-3)', fontSize: 12.5 }}>
+            Provisional: ranked after {minGames} games — ELO already counts.
+          </div>
+        )}
         {unplayed.length > 0 && (
           <div style={{ padding: '10px 14px', color: 'var(--ink-3)', fontSize: 12.5 }}>
             Yet to play: {unplayed.map((p) => p.name).join(', ')}
@@ -141,7 +167,14 @@ export default function LeagueTableScreen(): JSX.Element {
             : { position: 'fixed', left: -3000, top: 0 }
         }
       >
-        <ShareCard ref={cardRef} leagueName={data.settings.leagueName} seasonName={season.name} table={played} />
+        <ShareCard
+          ref={cardRef}
+          leagueName={data.settings.leagueName}
+          seasonName={season.name}
+          table={ranked}
+          provisional={provisional}
+          minGames={minGames}
+        />
       </div>
     </div>
   )

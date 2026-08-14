@@ -45,6 +45,9 @@ makes edit/delete/undo trivially correct where the spreadsheet was fragile.
 - Rounding is Excel's **half-away-from-zero** (`excelRound`), not JS `Math.round` —
   they differ on negative halves and it shows up in real deltas
 - League sort: ELO desc, tie-break average BP desc
+- Ranking eligibility: players need `Season.minRankedGames` games (default 2,
+  editable in Settings) to hold a rank; below that they're `provisional` (rank 0),
+  shown under the table. ELO still computes and counts — only the rank is withheld.
 
 Any change to these must be a deliberate league decision, versioned per season.
 
@@ -54,9 +57,18 @@ The old sheet had silent data-entry bugs the importer now normalizes:
 
 1. **Text dates** — guest date typed as `"08/13/2026"` → `#VALUE!` broke the sort-key
    chain; the game counted in totals but not ELO. `parseDate` accepts serials, ISO,
-   and slash dates (unambiguous month position wins; ambiguous assumes dd/mm UK).
+   and slash dates (unambiguous month position wins; ambiguous assumes mm/dd US —
+   the league types dates US-style).
 2. **Trailing-space names** — `"Andrew  "` became a phantom player; Excel COUNTIF/LOOKUP
    don't trim. All names/factions are whitespace-collapsed and matched case-insensitively.
+3. **US dates misread by UK Excel** — Miles typed mm/dd but UK-locale Excel stored
+   some as dd/mm *serials* (e.g. "8/12/2026" → serial for 8 Dec, a future date), so
+   the wrong date is baked into the cell and invisible to text parsing. The importer
+   repairs any imported date in the future by swapping day/month when that lands in
+   the past, and flags each in the report notes ("Please confirm"). Rows 25–28 of the
+   Match Log were affected (true dates 9–12 Aug 2026); the swap is ELO-neutral because
+   relative order among the affected players is preserved. The Add Result form also
+   rejects future dates outright.
 
 Corrected results: Allan 1017→1032, Andrew 1011→982 (±1 knock-ons for John/Kev).
 The reconciliation report is stored on `LeagueData.importReport` and shown in Settings.
@@ -94,6 +106,9 @@ PKH_SHOT=/path/shot.png PKH_SHOT_SCREEN=charts PKH_SHOT_SCROLL=1500 npx electron
 - Fonts: Bahnschrift (headings, ships with Win 11), Segoe UI (body) — nothing bundled.
 - Player identity is by stable `id`; renames just edit `Player.name` and all history
   follows. Color-slot assignment on the ELO chart is per-entity and stable while selected.
+- Dispositions: optional free-text per player per game (all three log types), tracked
+  player-agnostically in `dispositionStats` with its own W/D/L chart. No canonical
+  list — the suggestion dropdown is built from values already recorded.
 - Share card is 1080px wide, exported at 2× via `html-to-image`.
 
 ## Data locations

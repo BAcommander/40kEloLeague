@@ -6,19 +6,79 @@ import { FACTIONS, nextSeq, todayIso, uid, updateSeason } from '../lib'
 
 type Tab = 'Match' | 'Tournament' | 'Guest'
 
-/** The faction this player fielded most recently (prefill for the faction picker). */
-function lastFaction(season: Season, playerId: string): string {
-  let best: { date: string; faction: string } | null = null
-  const consider = (date: string, faction?: string): void => {
-    if (faction && (!best || date >= best.date)) best = { date, faction }
+/** The most recent value of some per-game field for this player (prefill for pickers). */
+function lastValue(
+  season: Season,
+  playerId: string,
+  pick: {
+    match: (m: MatchGame, side: 'p1' | 'p2') => string | undefined
+    tournament: (t: TournamentEntry) => string | undefined
+    guest: (g: GuestGame) => string | undefined
+  }
+): string {
+  let best: { date: string; value: string } | null = null
+  const consider = (date: string, value?: string): void => {
+    if (value && (!best || date >= best.date)) best = { date, value }
   }
   for (const m of season.matches) {
-    if (m.p1 === playerId) consider(m.date, m.faction1)
-    if (m.p2 === playerId) consider(m.date, m.faction2)
+    if (m.p1 === playerId) consider(m.date, pick.match(m, 'p1'))
+    if (m.p2 === playerId) consider(m.date, pick.match(m, 'p2'))
   }
-  for (const t of season.tournamentEntries) if (t.player === playerId) consider(t.date, t.faction)
-  for (const g of season.guestGames) if (g.player === playerId) consider(g.date, g.playerFaction)
-  return best ? (best as { faction: string }).faction : ''
+  for (const t of season.tournamentEntries) if (t.player === playerId) consider(t.date, pick.tournament(t))
+  for (const g of season.guestGames) if (g.player === playerId) consider(g.date, pick.guest(g))
+  return best ? (best as { value: string }).value : ''
+}
+
+const lastFaction = (season: Season, playerId: string): string =>
+  lastValue(season, playerId, {
+    match: (m, side) => (side === 'p1' ? m.faction1 : m.faction2),
+    tournament: (t) => t.faction,
+    guest: (g) => g.playerFaction
+  })
+
+const lastDisposition = (season: Season, playerId: string): string =>
+  lastValue(season, playerId, {
+    match: (m, side) => (side === 'p1' ? m.disposition1 : m.disposition2),
+    tournament: (t) => t.disposition,
+    guest: (g) => g.playerDisposition
+  })
+
+/** Every disposition recorded so far, for the suggestion dropdown (free text allowed). */
+function usedDispositions(season: Season): string[] {
+  const set = new Set<string>()
+  for (const m of season.matches) {
+    if (m.disposition1) set.add(m.disposition1)
+    if (m.disposition2) set.add(m.disposition2)
+  }
+  for (const t of season.tournamentEntries) if (t.disposition) set.add(t.disposition)
+  for (const g of season.guestGames) if (g.playerDisposition) set.add(g.playerDisposition)
+  return [...set].sort((a, b) => a.localeCompare(b))
+}
+
+function SuggestInput(props: {
+  label: string
+  value: string
+  onChange: (v: string) => void
+  options: string[]
+  placeholder: string
+}): JSX.Element {
+  const listId = useMemo(() => uid('fl'), [])
+  return (
+    <div className="field">
+      <label>{props.label}</label>
+      <input
+        list={listId}
+        value={props.value}
+        onChange={(e) => props.onChange(e.target.value)}
+        placeholder={props.placeholder}
+      />
+      <datalist id={listId}>
+        {props.options.map((f) => (
+          <option key={f} value={f} />
+        ))}
+      </datalist>
+    </div>
+  )
 }
 
 function FactionInput(props: {
@@ -26,18 +86,7 @@ function FactionInput(props: {
   value: string
   onChange: (v: string) => void
 }): JSX.Element {
-  const listId = useMemo(() => uid('fl'), [])
-  return (
-    <div className="field">
-      <label>{props.label}</label>
-      <input list={listId} value={props.value} onChange={(e) => props.onChange(e.target.value)} placeholder="Faction" />
-      <datalist id={listId}>
-        {FACTIONS.map((f) => (
-          <option key={f} value={f} />
-        ))}
-      </datalist>
-    </div>
-  )
+  return <SuggestInput {...props} options={FACTIONS} placeholder="Faction" />
 }
 
 function PlayerSelect(props: {
@@ -181,6 +230,8 @@ export function EventEditor(props: { edit?: EditTarget; onDone?: () => void }): 
   const [bp2, setBp2] = useState(existingMatch?.bp2?.toString() ?? existingGuest?.oppBP?.toString() ?? '')
   const [f1, setF1] = useState(existingMatch?.faction1 ?? existingGuest?.playerFaction ?? '')
   const [f2, setF2] = useState(existingMatch?.faction2 ?? existingGuest?.oppFaction ?? '')
+  const [disp1, setDisp1] = useState(existingMatch?.disposition1 ?? existingGuest?.playerDisposition ?? '')
+  const [disp2, setDisp2] = useState(existingMatch?.disposition2 ?? '')
 
   // --- tournament ---
   const [tourney, setTourney] = useState(existingTournament?.tournament ?? '')
@@ -192,6 +243,7 @@ export function EventEditor(props: { edit?: EditTarget; onDone?: () => void }): 
   const [vp, setVp] = useState(existingTournament?.vp?.toString() ?? '')
   const [sos, setSos] = useState(existingTournament?.sos.toString() ?? '')
   const [tFaction, setTFaction] = useState(existingTournament?.faction ?? '')
+  const [tDisposition, setTDisposition] = useState(existingTournament?.disposition ?? '')
 
   // --- guest ---
   const [guestName, setGuestName] = useState(existingGuest?.guestName ?? '')
@@ -208,6 +260,24 @@ export function EventEditor(props: { edit?: EditTarget; onDone?: () => void }): 
       const last = lastFaction(season, playerId)
       if (last) set(last)
     }
+  }
+
+  const pickDisposition = (playerId: string, set: (v: string) => void, current: string): void => {
+    if (!current) {
+      const last = lastDisposition(season, playerId)
+      if (last) set(last)
+    }
+  }
+
+  const dispositionOptions = useMemo(() => usedDispositions(season), [season])
+
+  /** Results can't be from the future — a future date is a day/month mix-up. */
+  const dateOk = (): boolean => {
+    if (date > todayIso()) {
+      toast('That date is in the future — check the day and month', 'error')
+      return false
+    }
+    return true
   }
 
   /** Save, then toast the resulting ELO movements for the players involved. */
@@ -238,6 +308,7 @@ export function EventEditor(props: { edit?: EditTarget; onDone?: () => void }): 
       toast('Pick two different players', 'error')
       return
     }
+    if (!dateOk()) return
     const id = existingMatch?.id ?? uid('m')
     const entry: MatchGame = {
       id,
@@ -249,6 +320,8 @@ export function EventEditor(props: { edit?: EditTarget; onDone?: () => void }): 
       bp2: num(bp2),
       faction1: f1.trim() || undefined,
       faction2: f2.trim() || undefined,
+      disposition1: disp1.trim() || undefined,
+      disposition2: disp2.trim() || undefined,
       notes: notes.trim() || undefined,
       seq: existingMatch?.seq ?? nextSeq(season)
     }
@@ -280,6 +353,7 @@ export function EventEditor(props: { edit?: EditTarget; onDone?: () => void }): 
       toast(`W+D+L (${w + d + l}) must equal rounds played (${r})`, 'error')
       return
     }
+    if (!dateOk()) return
     const id = existingTournament?.id ?? uid('t')
     const entry: TournamentEntry = {
       id,
@@ -293,6 +367,7 @@ export function EventEditor(props: { edit?: EditTarget; onDone?: () => void }): 
       vp: num(vp),
       sos: so,
       faction: tFaction.trim() || undefined,
+      disposition: tDisposition.trim() || undefined,
       notes: notes.trim() || undefined,
       seq: existingTournament?.seq ?? nextSeq(season)
     }
@@ -313,6 +388,7 @@ export function EventEditor(props: { edit?: EditTarget; onDone?: () => void }): 
       toast('League player and guest name are required', 'error')
       return
     }
+    if (!dateOk()) return
     const id = existingGuest?.id ?? uid('g')
     const entry: GuestGame = {
       id,
@@ -323,6 +399,7 @@ export function EventEditor(props: { edit?: EditTarget; onDone?: () => void }): 
       oppBP: num(bp2),
       playerFaction: f1.trim() || undefined,
       oppFaction: f2.trim() || undefined,
+      playerDisposition: disp1.trim() || undefined,
       guestName: guestName.trim(),
       guestElo: num(guestElo),
       notes: notes.trim() || undefined,
@@ -370,6 +447,7 @@ export function EventEditor(props: { edit?: EditTarget; onDone?: () => void }): 
                 onChange={(id) => {
                   setP1(id)
                   pickFaction(id, setF1, f1)
+                  pickDisposition(id, setDisp1, disp1)
                 }}
                 onAddPlayer={addPlayer}
               />
@@ -380,6 +458,7 @@ export function EventEditor(props: { edit?: EditTarget; onDone?: () => void }): 
                 onChange={(id) => {
                   setP2(id)
                   pickFaction(id, setF2, f2)
+                  pickDisposition(id, setDisp2, disp2)
                 }}
                 onAddPlayer={addPlayer}
               />
@@ -388,6 +467,20 @@ export function EventEditor(props: { edit?: EditTarget; onDone?: () => void }): 
               <NumField label="BP — Player 2" value={bp2} onChange={setBp2} placeholder="0–100" />
               <FactionInput label="Faction — Player 1" value={f1} onChange={setF1} />
               <FactionInput label="Faction — Player 2" value={f2} onChange={setF2} />
+              <SuggestInput
+                label="Disposition — Player 1"
+                value={disp1}
+                onChange={setDisp1}
+                options={dispositionOptions}
+                placeholder="Optional"
+              />
+              <SuggestInput
+                label="Disposition — Player 2"
+                value={disp2}
+                onChange={setDisp2}
+                options={dispositionOptions}
+                placeholder="Optional"
+              />
               <div className="field wide">
                 <label>Notes</label>
                 <input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optional" />
@@ -433,6 +526,7 @@ export function EventEditor(props: { edit?: EditTarget; onDone?: () => void }): 
                 onChange={(id) => {
                   setTPlayer(id)
                   pickFaction(id, setTFaction, tFaction)
+                  pickDisposition(id, setTDisposition, tDisposition)
                 }}
                 onAddPlayer={addPlayer}
               />
@@ -443,6 +537,13 @@ export function EventEditor(props: { edit?: EditTarget; onDone?: () => void }): 
               <NumField label="VP total" value={vp} onChange={setVp} />
               <NumField label="SoS (0.00–1.00)" value={sos} onChange={setSos} step="0.01" placeholder="e.g. 0.76" />
               <FactionInput label="Faction" value={tFaction} onChange={setTFaction} />
+              <SuggestInput
+                label="Disposition"
+                value={tDisposition}
+                onChange={setTDisposition}
+                options={dispositionOptions}
+                placeholder="Optional"
+              />
               <div className="field wide">
                 <label>Notes</label>
                 <input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optional" />
@@ -474,6 +575,7 @@ export function EventEditor(props: { edit?: EditTarget; onDone?: () => void }): 
                 onChange={(id) => {
                   setTPlayer(id)
                   pickFaction(id, setF1, f1)
+                  pickDisposition(id, setDisp1, disp1)
                 }}
                 onAddPlayer={addPlayer}
               />
@@ -487,6 +589,13 @@ export function EventEditor(props: { edit?: EditTarget; onDone?: () => void }): 
               <NumField label="BP — guest" value={bp2} onChange={setBp2} placeholder="0–100" />
               <FactionInput label="Faction — league player" value={f1} onChange={setF1} />
               <FactionInput label="Faction — guest" value={f2} onChange={setF2} />
+              <SuggestInput
+                label="Disposition — league player"
+                value={disp1}
+                onChange={setDisp1}
+                options={dispositionOptions}
+                placeholder="Optional"
+              />
               <div className="field wide">
                 <label>Notes</label>
                 <input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optional" />

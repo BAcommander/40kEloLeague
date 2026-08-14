@@ -6,13 +6,19 @@ interface Props {
   leagueName: string
   seasonName: string
   table: PlayerStats[]
+  /** Players below the minimum ranked games — shown as a footnote, not table rows. */
+  provisional?: PlayerStats[]
+  minGames?: number
 }
 
 /**
  * The shareable league-table graphic (rendered off-screen, exported as PNG at 2x).
  * 1080px wide — sized for WhatsApp/phone screens.
  */
-const ShareCard = forwardRef<HTMLDivElement, Props>(function ShareCard({ leagueName, seasonName, table }, ref) {
+const ShareCard = forwardRef<HTMLDivElement, Props>(function ShareCard(
+  { leagueName, seasonName, table, provisional = [], minGames = 2 },
+  ref
+) {
   const medal = (rank: number): string => (rank === 1 ? '#c9a24b' : rank === 2 ? '#b9b9b9' : rank === 3 ? '#b0793d' : 'transparent')
   return (
     <div
@@ -157,6 +163,13 @@ const ShareCard = forwardRef<HTMLDivElement, Props>(function ShareCard({ leagueN
           })}
         </tbody>
       </table>
+
+      {provisional.length > 0 && (
+        <div style={{ marginTop: 18, color: '#8a8071', fontSize: 16 }}>
+          Provisional (ranked after {minGames} games):{' '}
+          {provisional.map((p) => `${p.name} ${p.elo} · ${p.wins}–${p.draws}–${p.losses}`).join('  ·  ')}
+        </div>
+      )}
 
       <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 26, color: '#8a8071', fontSize: 15 }}>
         <span>In the grim darkness of the far future, there is only war.</span>

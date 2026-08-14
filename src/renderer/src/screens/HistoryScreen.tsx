@@ -83,6 +83,7 @@ export default function HistoryScreen(): JSX.Element {
               )}
               <span style={{ color: 'var(--ink-2)' }}>vs {e.opponentLabel}</span>
               {e.faction && <span style={{ color: 'var(--ink-3)', fontSize: 12 }}> · {e.faction}</span>}
+              {e.disposition && <span style={{ color: 'var(--ink-3)', fontSize: 12 }}> · {e.disposition}</span>}
             </span>
             <span className="elo-shift">
               {e.eloBefore} → {e.eloAfter}
