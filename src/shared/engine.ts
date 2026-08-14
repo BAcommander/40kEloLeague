@@ -18,7 +18,7 @@ export const DEFAULT_START_ELO = 1000
 export const MATCH_K = 32
 export const TOURNAMENT_K_CAP = 96
 /** Games needed before a player appears in the ranked table (per-season override on Season). */
-export const DEFAULT_MIN_RANKED_GAMES = 2
+export const DEFAULT_MIN_RANKED_GAMES = 3
 
 /** Excel's ROUND: half away from zero (JS Math.round rounds -16.5 to -16, Excel to -17). */
 export function excelRound(x: number, dp = 0): number {

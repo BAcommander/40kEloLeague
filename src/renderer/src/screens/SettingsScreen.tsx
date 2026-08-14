@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { ImportReport, LeagueData, Season } from '@shared/types'
-import { computeSeason, DEFAULT_START_ELO, excelRound } from '@shared/engine'
+import { computeSeason, DEFAULT_MIN_RANKED_GAMES, DEFAULT_START_ELO, excelRound } from '@shared/engine'
 import { useApp } from '../App'
 import { api } from '../api'
 import { fmtDate, uid, updateSeason } from '../lib'
@@ -68,9 +68,9 @@ export default function SettingsScreen(): JSX.Element {
     toast('League name updated')
   }
 
-  const [minRanked, setMinRanked] = useState(String(season.minRankedGames ?? 2))
+  const [minRanked, setMinRanked] = useState(String(season.minRankedGames ?? DEFAULT_MIN_RANKED_GAMES))
   const saveMinRanked = (): void => {
-    const n = Math.max(1, Math.round(Number(minRanked) || 2))
+    const n = Math.max(1, Math.round(Number(minRanked) || DEFAULT_MIN_RANKED_GAMES))
     mutate((d) => updateSeason(d, season.id, (s) => ({ ...s, minRankedGames: n })))
     setMinRanked(String(n))
     toast(`Players now need ${n} game${n === 1 ? '' : 's'} to appear in the rankings`)

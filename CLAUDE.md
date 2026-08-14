@@ -45,9 +45,10 @@ makes edit/delete/undo trivially correct where the spreadsheet was fragile.
 - Rounding is Excel's **half-away-from-zero** (`excelRound`), not JS `Math.round` —
   they differ on negative halves and it shows up in real deltas
 - League sort: ELO desc, tie-break average BP desc
-- Ranking eligibility: players need `Season.minRankedGames` games (default 2,
+- Ranking eligibility: players need `Season.minRankedGames` games (default 3,
   editable in Settings) to hold a rank; below that they're `provisional` (rank 0),
-  shown under the table. ELO still computes and counts — only the rank is withheld.
+  shown below a divider line under the table. ELO still computes and counts —
+  only the rank is withheld.
 
 Any change to these must be a deliberate league decision, versioned per season.
 

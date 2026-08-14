@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from 'react'
 import { toPng } from 'html-to-image'
-import { computeSeason } from '@shared/engine'
+import { computeSeason, DEFAULT_MIN_RANKED_GAMES } from '@shared/engine'
 import type { Season } from '@shared/types'
 import { useApp } from '../App'
 import { api } from '../api'
@@ -37,7 +37,7 @@ export default function LeagueTableScreen(): JSX.Element {
   const ranked = comp.table.filter((p) => !p.provisional)
   const provisional = comp.table.filter((p) => p.provisional && p.games > 0)
   const unplayed = comp.table.filter((p) => p.games === 0)
-  const minGames = season.minRankedGames ?? 2
+  const minGames = season.minRankedGames ?? DEFAULT_MIN_RANKED_GAMES
 
   const renderPng = async (): Promise<string | null> => {
     if (!cardRef.current) return null
@@ -127,8 +127,8 @@ export default function LeagueTableScreen(): JSX.Element {
                 </tr>
               )
             })}
-            {provisional.map((p) => (
-              <tr key={p.playerId} style={{ opacity: 0.62 }}>
+            {provisional.map((p, i) => (
+              <tr key={p.playerId} className={i === 0 ? 'provisional-start' : ''} style={{ opacity: 0.62 }}>
                 <td>
                   <span className="rank-cell" style={{ fontSize: 11, letterSpacing: '0.04em' }}>PROV</span>
                 </td>

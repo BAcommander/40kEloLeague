@@ -214,7 +214,7 @@ describe('Ranking eligibility (minimum games) and disposition stats', () => {
     guestGames: []
   }
 
-  it('players under the default 2-game minimum are provisional and unranked', () => {
+  it('players under the default 3-game minimum are provisional and unranked', () => {
     const { table } = computeSeason(mini)
     const c = table.find((p) => p.name === 'C')!
     expect(c.games).toBe(1)
@@ -222,13 +222,16 @@ describe('Ranking eligibility (minimum games) and disposition stats', () => {
     expect(c.rank).toBe(0)
     // Despite winning their only game (ELO 1016), C claims no table position.
     expect(c.elo).toBe(1016)
+    // B has 2 games — once or twice still isn't enough.
+    expect(table.find((p) => p.name === 'B')!.provisional).toBe(true)
   })
 
   it('qualified players get consecutive ranks with no gaps', () => {
     const { table } = computeSeason(mini)
     const ranked = table.filter((p) => !p.provisional)
-    expect(ranked.map((p) => p.rank)).toEqual([1, 2])
-    expect(ranked.every((p) => p.games >= 2)).toBe(true)
+    expect(ranked.map((p) => p.name)).toEqual(['A'])
+    expect(ranked.map((p) => p.rank)).toEqual([1])
+    expect(ranked.every((p) => p.games >= 3)).toBe(true)
   })
 
   it('respects a per-season minRankedGames override', () => {

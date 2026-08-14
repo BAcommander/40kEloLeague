@@ -323,6 +323,11 @@ table.league tr:last-child td {
   border-bottom: none;
 }
 
+/* The line between ranked players and provisional ones (too few games to rank). */
+table.league tr.provisional-start td {
+  border-top: 2px solid rgba(201, 162, 75, 0.35);
+}
+
 table.league tr:hover td {
   background: rgba(255, 255, 255, 0.025);
 }

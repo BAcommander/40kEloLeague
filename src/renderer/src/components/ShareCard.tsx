@@ -16,7 +16,7 @@ interface Props {
  * 1080px wide — sized for WhatsApp/phone screens.
  */
 const ShareCard = forwardRef<HTMLDivElement, Props>(function ShareCard(
-  { leagueName, seasonName, table, provisional = [], minGames = 2 },
+  { leagueName, seasonName, table, provisional = [], minGames = 3 },
   ref
 ) {
   const medal = (rank: number): string => (rank === 1 ? '#c9a24b' : rank === 2 ? '#b9b9b9' : rank === 3 ? '#b0793d' : 'transparent')
