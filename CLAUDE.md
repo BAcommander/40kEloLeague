@@ -107,8 +107,10 @@ PKH_SHOT=/path/shot.png PKH_SHOT_SCREEN=charts PKH_SHOT_SCROLL=1500 npx electron
 - Player identity is by stable `id`; renames just edit `Player.name` and all history
   follows. Color-slot assignment on the ELO chart is per-entity and stable while selected.
 - Dispositions: optional free-text per player per game (all three log types), tracked
-  player-agnostically in `dispositionStats` with its own W/D/L chart. No canonical
-  list — the suggestion dropdown is built from values already recorded.
+  player-agnostically in `dispositionStats` with its own W/D/L chart. The suggestion
+  dropdown seeds the five 11th-ed force dispositions (`DISPOSITIONS` in `lib.ts`:
+  Take and Hold, Purge the Foe, Disruption, Reconnaissance, Priority Assets — per
+  https://game-datamissions.com/11th/matrix) plus any other values already recorded.
 - Share card is 1080px wide, exported at 2× via `html-to-image`.
 
 ## Data locations

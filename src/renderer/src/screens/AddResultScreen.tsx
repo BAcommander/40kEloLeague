@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import type { GameResult, GuestGame, MatchGame, Season, TournamentEntry } from '@shared/types'
 import { computeSeason } from '@shared/engine'
 import { useApp } from '../App'
-import { FACTIONS, nextSeq, todayIso, uid, updateSeason } from '../lib'
+import { DISPOSITIONS, FACTIONS, nextSeq, todayIso, uid, updateSeason } from '../lib'
 
 type Tab = 'Match' | 'Tournament' | 'Guest'
 
@@ -43,8 +43,8 @@ const lastDisposition = (season: Season, playerId: string): string =>
     guest: (g) => g.playerDisposition
   })
 
-/** Every disposition recorded so far, for the suggestion dropdown (free text allowed). */
-function usedDispositions(season: Season): string[] {
+/** The five canonical dispositions first, then anything else recorded in the season. */
+function dispositionSuggestions(season: Season): string[] {
   const set = new Set<string>()
   for (const m of season.matches) {
     if (m.disposition1) set.add(m.disposition1)
@@ -52,7 +52,10 @@ function usedDispositions(season: Season): string[] {
   }
   for (const t of season.tournamentEntries) if (t.disposition) set.add(t.disposition)
   for (const g of season.guestGames) if (g.playerDisposition) set.add(g.playerDisposition)
-  return [...set].sort((a, b) => a.localeCompare(b))
+  const extras = [...set]
+    .filter((d) => !DISPOSITIONS.some((c) => c.toLowerCase() === d.toLowerCase()))
+    .sort((a, b) => a.localeCompare(b))
+  return [...DISPOSITIONS, ...extras]
 }
 
 function SuggestInput(props: {
@@ -269,7 +272,7 @@ export function EventEditor(props: { edit?: EditTarget; onDone?: () => void }): 
     }
   }
 
-  const dispositionOptions = useMemo(() => usedDispositions(season), [season])
+  const dispositionOptions = useMemo(() => dispositionSuggestions(season), [season])
 
   /** Results can't be from the future — a future date is a day/month mix-up. */
   const dateOk = (): boolean => {

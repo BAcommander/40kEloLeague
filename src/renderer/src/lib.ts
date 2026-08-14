@@ -43,6 +43,15 @@ export const SERIES = ['#3987e5', '#d95926', '#199e70', '#c98500', '#d55181', '#
 
 export const WDL = { win: '#2b9c48', draw: '#6b6660', loss: '#e66767' }
 
+/** The five 11th-edition force dispositions each player picks from (free text also allowed). */
+export const DISPOSITIONS = [
+  'Take and Hold',
+  'Purge the Foe',
+  'Disruption',
+  'Reconnaissance',
+  'Priority Assets'
+]
+
 /** All known 10th-edition faction names for the faction dropdown (free text also allowed). */
 export const FACTIONS = [
   'Ad Mech', 'Adepta Sororitas', 'Adeptus Custodes', 'Aeldari', 'Astra Militarum', 'Black Templars',
