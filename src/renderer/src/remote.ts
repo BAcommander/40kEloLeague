@@ -7,14 +7,8 @@ import type { LeagueData } from '@shared/types'
 import type { ImportResult } from '@shared/importXlsx'
 import type { AppendRequest, LeagueSnapshot, Role } from '@shared/protocol'
 
-export class ApiError extends Error {
-  constructor(
-    public status: number,
-    message: string
-  ) {
-    super(message)
-  }
-}
+export { ApiError } from '@shared/protocol'
+import { ApiError } from '@shared/protocol'
 
 const WORKER_URL = ((import.meta.env.VITE_WORKER_URL as string | undefined) ?? '').replace(/\/+$/, '')
 

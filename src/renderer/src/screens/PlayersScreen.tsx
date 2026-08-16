@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { normName } from '@shared/data'
 import { useApp } from '../App'
 import { fmtDate, fmtPct, uid, updateSeason } from '../lib'
 
@@ -42,7 +43,7 @@ export default function PlayersScreen(): JSX.Element {
   const addPlayer = async (): Promise<void> => {
     const name = addName.trim()
     if (!name) return
-    if (season.players.some((p) => p.name.toLowerCase() === name.toLowerCase())) {
+    if (season.players.some((p) => normName(p.name) === normName(name))) {
       toast('A player with that name already exists', 'error')
       return
     }

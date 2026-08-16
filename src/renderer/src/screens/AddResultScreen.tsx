@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import type { GameResult, GuestGame, MatchGame, Player, Season, SeasonComputation, TournamentEntry } from '@shared/types'
 import type { AppendKind, AppendRequest } from '@shared/protocol'
 import { computeSeason } from '@shared/engine'
+import { normName } from '@shared/data'
 import { useApp } from '../App'
 import { DISPOSITIONS, FACTIONS, todayIso, uid, updateSeason } from '../lib'
 
@@ -261,7 +262,9 @@ export function EventEditor(props: { edit?: EditTarget; onDone?: () => void }): 
   const allPlayers = useMemo(() => [...season.players, ...pendingPlayers], [season.players, pendingPlayers])
 
   const addPlayer = (name: string): string => {
-    const existing = allPlayers.find((p) => p.name.trim().toLowerCase() === name.toLowerCase())
+    // Same duplicate rule as the worker (whitespace-collapsed, case-insensitive) —
+    // a weaker client check just turns into a confusing 409 on save.
+    const existing = allPlayers.find((p) => normName(p.name) === normName(name))
     if (existing) return existing.id
     const id = uid('p')
     setPendingPlayers((ps) => [...ps, { id, name }])

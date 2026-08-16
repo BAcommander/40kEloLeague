@@ -1,6 +1,16 @@
 /** Request/response shapes shared by the web client and the Cloudflare Worker API. */
 import type { GuestGame, LeagueData, MatchGame, Player, TournamentEntry } from './types'
 
+/** An error that should surface to the client as a clean {status, message}. */
+export class ApiError extends Error {
+  constructor(
+    public status: number,
+    message: string
+  ) {
+    super(message)
+  }
+}
+
 export type Role = 'member' | 'admin'
 
 export type AppendKind = 'match' | 'tournament' | 'guest' | 'player'

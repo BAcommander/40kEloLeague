@@ -198,8 +198,13 @@ export default function App(): JSX.Element {
     if (!opts?.force && savesInFlight.current > 0) return
     try {
       const snap = await getLeague()
-      if (snap.sha !== shaRef.current) clearUndo()
-      setSnap(snap.data, snap.sha)
+      const changed = snap.sha !== shaRef.current
+      if (changed) clearUndo()
+      // An unchanged sha on a routine poll means identical data — skip the state
+      // swap so the 60s viewer poll doesn't re-replay the season and repaint
+      // every chart for nothing. Forced refreshes (save recovery) always apply:
+      // there the LOCAL state is the thing that's wrong.
+      if (changed || opts?.force) setSnap(snap.data, snap.sha)
       setLoadError(null)
     } catch (e) {
       if (opts?.showError) setLoadError(e instanceof Error ? e.message : 'Could not load the league')
@@ -237,7 +242,13 @@ export default function App(): JSX.Element {
   const persistAdmin = useCallback(
     (next: LeagueData, undoFrom: LeagueData | null) => {
       const s = sessionRef.current
-      if (!s || s.role !== 'admin' || !dataRef.current) return
+      if (!s || s.role !== 'admin') {
+        // Fail loudly: a screen that forgot its role gate must not ship a button
+        // that silently drops the edit.
+        setUnlockOpen(true)
+        return
+      }
+      if (!dataRef.current) return
       if (undoFrom) {
         undoStack.current.push(undoFrom)
         if (undoStack.current.length > 30) undoStack.current.shift()
@@ -336,6 +347,17 @@ export default function App(): JSX.Element {
   const season = useMemo(() => (data ? activeSeason(data) : null), [data])
   const comp = useMemo(() => (season ? computeSeason(season) : null), [season])
 
+  const enteredBy = session?.enteredBy ?? ''
+  // Memoized so a toast appearing/expiring (App state) doesn't hand every screen
+  // a fresh context and repaint the charts for nothing.
+  const ctx = useMemo<AppCtx | null>(
+    () =>
+      data && season && comp
+        ? { data, season, comp, role, enteredBy, append, mutate, replaceData, toast, undo, canUndo, go: setScreen }
+        : null,
+    [data, season, comp, role, enteredBy, append, mutate, replaceData, toast, undo, canUndo]
+  )
+
   if (loadError) {
     return (
       <div style={{ padding: 40, color: '#b8ad98', maxWidth: 480 }}>
@@ -348,23 +370,8 @@ export default function App(): JSX.Element {
     )
   }
 
-  if (!data || !season || !comp) {
+  if (!ctx || !season) {
     return <div style={{ padding: 40, color: '#8a8071' }}>Loading league…</div>
-  }
-
-  const ctx: AppCtx = {
-    data,
-    season,
-    comp,
-    role,
-    enteredBy: session?.enteredBy ?? '',
-    append,
-    mutate,
-    replaceData,
-    toast,
-    undo,
-    canUndo,
-    go: setScreen
   }
 
   const nav = NAV.filter((n) => n.id !== 'add' || role !== 'viewer')
