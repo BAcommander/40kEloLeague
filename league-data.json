@@ -1,0 +1,552 @@
+{
+  "version": 1,
+  "settings": {
+    "leagueName": "PKH W40K ELO League"
+  },
+  "activeSeasonId": "season-1",
+  "seasons": [
+    {
+      "id": "season-1",
+      "name": "Season 1",
+      "players": [
+        {
+          "id": "p-andrew",
+          "name": "Andrew"
+        },
+        {
+          "id": "p-colin",
+          "name": "Colin"
+        },
+        {
+          "id": "p-miles",
+          "name": "Miles"
+        },
+        {
+          "id": "p-john",
+          "name": "John"
+        },
+        {
+          "id": "p-brett",
+          "name": "Brett"
+        },
+        {
+          "id": "p-gav",
+          "name": "Gav"
+        },
+        {
+          "id": "p-allan",
+          "name": "Allan"
+        },
+        {
+          "id": "p-ryan",
+          "name": "Ryan"
+        },
+        {
+          "id": "p-kev",
+          "name": "Kev"
+        },
+        {
+          "id": "p-pete",
+          "name": "Pete"
+        }
+      ],
+      "matches": [
+        {
+          "id": "m-3",
+          "date": "2026-06-17",
+          "p1": "p-andrew",
+          "p2": "p-colin",
+          "result": "Loss",
+          "bp1": 65,
+          "bp2": 97,
+          "faction1": "Necrons",
+          "faction2": "Death Guard",
+          "seq": 3
+        },
+        {
+          "id": "m-4",
+          "date": "2026-06-20",
+          "p1": "p-andrew",
+          "p2": "p-colin",
+          "result": "Win",
+          "bp1": 91,
+          "bp2": 80,
+          "faction1": "Necrons",
+          "faction2": "Death Guard",
+          "seq": 4
+        },
+        {
+          "id": "m-5",
+          "date": "2026-06-20",
+          "p1": "p-andrew",
+          "p2": "p-miles",
+          "result": "Loss",
+          "bp1": 77,
+          "bp2": 88,
+          "faction1": "Necrons",
+          "faction2": "GSC",
+          "disposition1": "Purge the Foe",
+          "disposition2": "Reconnaissance",
+          "seq": 5
+        },
+        {
+          "id": "m-6",
+          "date": "2026-06-20",
+          "p1": "p-john",
+          "p2": "p-colin",
+          "result": "Win",
+          "bp1": 91,
+          "bp2": 69,
+          "faction1": "Blood Angels",
+          "faction2": "Death Guard",
+          "seq": 6
+        },
+        {
+          "id": "m-7",
+          "date": "2026-06-22",
+          "p1": "p-brett",
+          "p2": "p-colin",
+          "result": "Loss",
+          "bp1": 69,
+          "bp2": 70,
+          "faction1": "Orks",
+          "faction2": "Death Guard",
+          "seq": 7
+        },
+        {
+          "id": "m-8",
+          "date": "2026-06-23",
+          "p1": "p-andrew",
+          "p2": "p-colin",
+          "result": "Loss",
+          "bp1": 77,
+          "bp2": 85,
+          "faction1": "Necrons",
+          "faction2": "Death Guard",
+          "seq": 8
+        },
+        {
+          "id": "m-9",
+          "date": "2026-06-29",
+          "p1": "p-gav",
+          "p2": "p-brett",
+          "result": "Win",
+          "bp1": 93,
+          "bp2": 37,
+          "faction1": "Votaan",
+          "faction2": "Orks",
+          "seq": 9
+        },
+        {
+          "id": "m-10",
+          "date": "2026-06-30",
+          "p1": "p-andrew",
+          "p2": "p-colin",
+          "result": "Loss",
+          "bp1": 59,
+          "bp2": 86,
+          "faction1": "Necrons",
+          "faction2": "Death Guard",
+          "seq": 10
+        },
+        {
+          "id": "m-11",
+          "date": "2026-07-01",
+          "p1": "p-john",
+          "p2": "p-colin",
+          "result": "Win",
+          "bp1": 97,
+          "bp2": 78,
+          "faction1": "Blood Angels",
+          "faction2": "Death Guard",
+          "seq": 11
+        },
+        {
+          "id": "m-12",
+          "date": "2026-07-02",
+          "p1": "p-andrew",
+          "p2": "p-brett",
+          "result": "Win",
+          "bp1": 86,
+          "bp2": 69,
+          "faction1": "Necrons",
+          "faction2": "Orks",
+          "seq": 12
+        },
+        {
+          "id": "m-13",
+          "date": "2026-07-06",
+          "p1": "p-colin",
+          "p2": "p-miles",
+          "result": "Loss",
+          "bp1": 90,
+          "bp2": 94,
+          "faction1": "Death Guard",
+          "faction2": "Imperial Knights",
+          "seq": 13
+        },
+        {
+          "id": "m-14",
+          "date": "2026-07-07",
+          "p1": "p-andrew",
+          "p2": "p-colin",
+          "result": "Loss",
+          "bp1": 74,
+          "bp2": 81,
+          "faction1": "Necrons",
+          "faction2": "Death Guard",
+          "seq": 14
+        },
+        {
+          "id": "m-15",
+          "date": "2026-07-09",
+          "p1": "p-john",
+          "p2": "p-andrew",
+          "result": "Win",
+          "bp1": 95,
+          "bp2": 75,
+          "faction1": "Blood Angels",
+          "faction2": "Necrons",
+          "seq": 15
+        },
+        {
+          "id": "m-16",
+          "date": "2026-07-18",
+          "p1": "p-allan",
+          "p2": "p-colin",
+          "result": "Win",
+          "bp1": 87,
+          "bp2": 81,
+          "faction1": "Ad Mech",
+          "faction2": "Death Guard",
+          "seq": 16
+        },
+        {
+          "id": "m-17",
+          "date": "2026-07-20",
+          "p1": "p-brett",
+          "p2": "p-colin",
+          "result": "Win",
+          "bp1": 90,
+          "bp2": 66,
+          "faction1": "Orks",
+          "faction2": "Death Guard",
+          "seq": 17
+        },
+        {
+          "id": "m-18",
+          "date": "2026-07-21",
+          "p1": "p-andrew",
+          "p2": "p-colin",
+          "result": "Win",
+          "bp1": 100,
+          "bp2": 95,
+          "faction1": "Necrons",
+          "faction2": "Death Guard",
+          "seq": 18
+        },
+        {
+          "id": "m-19",
+          "date": "2026-07-22",
+          "p1": "p-ryan",
+          "p2": "p-kev",
+          "result": "Win",
+          "bp1": 58,
+          "bp2": 37,
+          "faction1": "Tyranids",
+          "faction2": "Aeldari",
+          "seq": 19
+        },
+        {
+          "id": "m-20",
+          "date": "2026-07-22",
+          "p1": "p-john",
+          "p2": "p-colin",
+          "result": "Draw",
+          "bp1": 97,
+          "bp2": 97,
+          "faction1": "Blood Angels",
+          "faction2": "Death Guard",
+          "seq": 20
+        },
+        {
+          "id": "m-21",
+          "date": "2026-07-24",
+          "p1": "p-pete",
+          "p2": "p-kev",
+          "result": "Win",
+          "bp1": 40,
+          "bp2": 32,
+          "faction1": "Deathwatch",
+          "faction2": "Aeldari",
+          "seq": 21
+        },
+        {
+          "id": "m-22",
+          "date": "2026-07-28",
+          "p1": "p-andrew",
+          "p2": "p-miles",
+          "result": "Win",
+          "bp1": 95,
+          "bp2": 87,
+          "faction1": "Necrons",
+          "faction2": "GSC",
+          "disposition1": "Purge the Foe",
+          "disposition2": "Reconnaissance",
+          "seq": 22
+        },
+        {
+          "id": "m-23",
+          "date": "2026-08-03",
+          "p1": "p-andrew",
+          "p2": "p-colin",
+          "result": "Win",
+          "bp1": 87,
+          "bp2": 73,
+          "faction1": "Necrons",
+          "faction2": "Death Guard",
+          "seq": 23
+        },
+        {
+          "id": "m-24",
+          "date": "2026-08-05",
+          "p1": "p-john",
+          "p2": "p-kev",
+          "result": "Win",
+          "bp1": 96,
+          "bp2": 66,
+          "faction1": "Blood Angels",
+          "faction2": "Aeldari",
+          "seq": 24
+        },
+        {
+          "id": "m-25",
+          "date": "2026-08-09",
+          "p1": "p-colin",
+          "p2": "p-miles",
+          "result": "Win",
+          "bp1": 92,
+          "bp2": 62,
+          "faction1": "Death Guard",
+          "faction2": "Emperors Children",
+          "disposition1": "Priority Assets",
+          "disposition2": "Take and Hold",
+          "seq": 25
+        },
+        {
+          "id": "m-26",
+          "date": "2026-08-11",
+          "p1": "p-colin",
+          "p2": "p-andrew",
+          "result": "Win",
+          "bp1": 99,
+          "bp2": 55,
+          "faction1": "Death Guard",
+          "faction2": "Necrons",
+          "seq": 26
+        },
+        {
+          "id": "m-27",
+          "date": "2026-08-11",
+          "p1": "p-gav",
+          "p2": "p-miles",
+          "result": "Loss",
+          "bp1": 73,
+          "bp2": 93,
+          "faction1": "Salamanders",
+          "faction2": "Emperors Children",
+          "disposition1": "Reconnaissance",
+          "disposition2": "Reconnaissance",
+          "seq": 27
+        },
+        {
+          "id": "m-28",
+          "date": "2026-08-12",
+          "p1": "p-john",
+          "p2": "p-brett",
+          "result": "Win",
+          "bp1": 83,
+          "bp2": 82,
+          "faction1": "Blood Angels",
+          "faction2": "Orks",
+          "seq": 28
+        }
+      ],
+      "tournamentEntries": [
+        {
+          "id": "t-4",
+          "date": "2026-06-27",
+          "tournament": "The Kelpie Cup #8",
+          "player": "p-andrew",
+          "rounds": 3,
+          "wins": 1,
+          "draws": 0,
+          "losses": 2,
+          "vp": 242,
+          "sos": 0.76,
+          "faction": "Necrons",
+          "seq": 4
+        },
+        {
+          "id": "t-5",
+          "date": "2026-06-25",
+          "tournament": "Brewhammer GT9",
+          "player": "p-john",
+          "rounds": 5,
+          "wins": 2,
+          "draws": 0,
+          "losses": 3,
+          "vp": 378,
+          "sos": 0.84,
+          "faction": "Blood Angels",
+          "seq": 5
+        },
+        {
+          "id": "t-6",
+          "date": "2026-06-25",
+          "tournament": "Brewhammer GT9",
+          "player": "p-gav",
+          "rounds": 5,
+          "wins": 3,
+          "draws": 0,
+          "losses": 2,
+          "vp": 373,
+          "sos": 0.75,
+          "faction": "Guard",
+          "seq": 6
+        },
+        {
+          "id": "t-msuuv0q9-4kq4y",
+          "date": "2026-08-15",
+          "tournament": "Speyhammer RTT Aug",
+          "player": "p-colin",
+          "rounds": 3,
+          "wins": 2,
+          "draws": 0,
+          "losses": 1,
+          "vp": 275,
+          "sos": 0.83,
+          "faction": "Death Guard",
+          "disposition": "Priority Assets",
+          "seq": 29
+        },
+        {
+          "id": "t-msuuwgg7-8unn3",
+          "date": "2026-08-15",
+          "tournament": "Speyhammer RTT Aug",
+          "player": "p-andrew",
+          "rounds": 3,
+          "wins": 1,
+          "draws": 0,
+          "losses": 2,
+          "vp": 276,
+          "sos": 0.81,
+          "faction": "Necrons",
+          "disposition": "Purge the Foe",
+          "seq": 30
+        },
+        {
+          "id": "t-msuuyhvj-bgrex",
+          "date": "2026-08-15",
+          "tournament": "Speyhammer RTT Aug",
+          "player": "p-miles",
+          "rounds": 3,
+          "wins": 2,
+          "draws": 0,
+          "losses": 1,
+          "vp": 270,
+          "sos": 0.83,
+          "faction": "Emperors Children",
+          "disposition": "Reconnaissance",
+          "seq": 31
+        }
+      ],
+      "guestGames": [
+        {
+          "id": "g-4",
+          "date": "2026-08-13",
+          "player": "p-allan",
+          "result": "Win",
+          "playerBP": 100,
+          "oppBP": 56,
+          "playerFaction": "Ad Mech",
+          "oppFaction": "Necrons",
+          "guestName": "Graeme",
+          "seq": 4
+        }
+      ]
+    }
+  ],
+  "importReport": {
+    "importedAt": "2026-08-14T16:56:40.615Z",
+    "matches": 26,
+    "tournamentEntries": 3,
+    "guestGames": 1,
+    "players": 10,
+    "diffs": [
+      {
+        "name": "Andrew",
+        "field": "ELO",
+        "old": 1011,
+        "new": 982
+      },
+      {
+        "name": "Andrew",
+        "field": "Peak ELO",
+        "old": 1011,
+        "new": 1001
+      },
+      {
+        "name": "Andrew",
+        "field": "Games",
+        "old": 13,
+        "new": 15
+      },
+      {
+        "name": "Andrew",
+        "field": "Losses",
+        "old": 7,
+        "new": 9
+      },
+      {
+        "name": "Andrew",
+        "field": "BP",
+        "old": 1053,
+        "new": 1183
+      },
+      {
+        "name": "John",
+        "field": "ELO",
+        "old": 1072,
+        "new": 1071
+      },
+      {
+        "name": "John",
+        "field": "Peak ELO",
+        "old": 1072,
+        "new": 1071
+      },
+      {
+        "name": "Allan",
+        "field": "ELO",
+        "old": 1017,
+        "new": 1032
+      },
+      {
+        "name": "Allan",
+        "field": "Peak ELO",
+        "old": 1017,
+        "new": 1032
+      },
+      {
+        "name": "Kev",
+        "field": "ELO",
+        "old": 957,
+        "new": 956
+      }
+    ],
+    "notes": [
+      "Guest Log row 4: date was stored as text \"08/13/2026\" — parsed as 2026-08-13 (this row previously broke the spreadsheet)"
+    ]
+  }
+}
