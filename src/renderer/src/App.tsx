@@ -150,6 +150,12 @@ export default function App(): JSX.Element {
   const sessionRef = useRef<Session | null>(session)
   sessionRef.current = session
   const savesInFlight = useRef(0)
+  // Admin saves are SERIALIZED: each queued save runs with the sha produced by the
+  // one before it, so two quick edits can't conflict with each other. A failed save
+  // bumps the epoch, which cancels anything still queued behind it (those documents
+  // were built on a base that never committed).
+  const saveChain = useRef<Promise<void>>(Promise.resolve())
+  const saveEpoch = useRef(0)
 
   const role: UiRole = session?.role ?? 'viewer'
 
@@ -175,19 +181,33 @@ export default function App(): JSX.Element {
     setSession(s)
   }, [])
 
-  const refresh = useCallback(async (silent = true): Promise<void> => {
-    if (savesInFlight.current > 0) return // don't clobber an optimistic save in progress
+  const clearUndo = useCallback(() => {
+    undoStack.current = []
+    setCanUndo(false)
+  }, [])
+
+  /**
+   * Re-fetch the league. Skipped while a save is in flight (a background poll must
+   * not clobber optimistic state) unless `force` — the save error paths use force,
+   * because at that point the optimistic state is exactly what must be replaced.
+   * If the server sha moved for any reason other than this tab's own admin saves,
+   * the undo stack dies with it: undoing over someone else's freshly-appended
+   * results would silently delete them.
+   */
+  const refresh = useCallback(async (opts?: { showError?: boolean; force?: boolean }): Promise<void> => {
+    if (!opts?.force && savesInFlight.current > 0) return
     try {
       const snap = await getLeague()
+      if (snap.sha !== shaRef.current) clearUndo()
       setSnap(snap.data, snap.sha)
       setLoadError(null)
     } catch (e) {
-      if (!silent) setLoadError(e instanceof Error ? e.message : 'Could not load the league')
+      if (opts?.showError) setLoadError(e instanceof Error ? e.message : 'Could not load the league')
     }
-  }, [setSnap])
+  }, [setSnap, clearUndo])
 
   useEffect(() => {
-    void refresh(false)
+    void refresh({ showError: true })
   }, [refresh])
 
   // Viewers (incl. the OBS overlay) poll for fresh results; everyone refetches on tab return.
@@ -208,44 +228,52 @@ export default function App(): JSX.Element {
     toast('Your league code is no longer valid — enter it again', 'error')
   }, [clearSession, toast])
 
-  /** Admin full-document save with optimistic local state and 409/401 recovery. */
+  /**
+   * Admin full-document save: optimistic paint immediately, actual PUT queued so
+   * saves commit in order, each on the sha the previous one produced. Any failure
+   * cancels the rest of the queue (their documents were built on a base that never
+   * landed), clears undo, and force-reloads server truth.
+   */
   const persistAdmin = useCallback(
     (next: LeagueData, undoFrom: LeagueData | null) => {
       const s = sessionRef.current
-      const prev = dataRef.current
-      if (!s || s.role !== 'admin' || !prev) return
+      if (!s || s.role !== 'admin' || !dataRef.current) return
       if (undoFrom) {
         undoStack.current.push(undoFrom)
         if (undoStack.current.length > 30) undoStack.current.shift()
         setCanUndo(true)
       }
-      const baseSha = shaRef.current
       dataRef.current = next
       setData(next)
+      const epoch = saveEpoch.current
       savesInFlight.current++
-      putLeague(next, baseSha, s.code, s.enteredBy)
-        .then((snap) => setSnap(snap.data, snap.sha))
-        .catch((e) => {
-          if (undoFrom) {
-            undoStack.current.pop()
-            setCanUndo(undoStack.current.length > 0)
-          }
-          if (e instanceof ApiError && e.status === 409) {
-            toast('Someone else saved first — reloaded the latest league. Your change was NOT applied; please redo it.', 'error')
-            void refresh()
-          } else if (e instanceof ApiError && (e.status === 401 || e.status === 403)) {
-            setSnap(prev, baseSha)
-            handleAuthError()
-          } else {
-            setSnap(prev, baseSha)
-            toast(`Save failed: ${e instanceof Error ? e.message : e}`, 'error')
+      saveChain.current = saveChain.current
+        .then(async () => {
+          if (epoch !== saveEpoch.current) return // a save ahead of this one failed
+          try {
+            const snap = await putLeague(next, shaRef.current, s.code, s.enteredBy)
+            shaRef.current = snap.sha
+            // Only paint the server document if nothing newer is queued behind us —
+            // otherwise we'd flash an older state over a later optimistic edit.
+            if (savesInFlight.current === 1) setSnap(snap.data, snap.sha)
+          } catch (e) {
+            saveEpoch.current++
+            clearUndo()
+            if (e instanceof ApiError && e.status === 409) {
+              toast('Someone else saved first — reloaded the latest league. Your change was NOT applied; please redo it.', 'error')
+            } else if (e instanceof ApiError && (e.status === 401 || e.status === 403)) {
+              handleAuthError()
+            } else {
+              toast(`Save failed: ${e instanceof Error ? e.message : e}`, 'error')
+            }
+            await refresh({ force: true })
           }
         })
         .finally(() => {
           savesInFlight.current--
         })
     },
-    [setSnap, toast, refresh, handleAuthError]
+    [setSnap, toast, refresh, handleAuthError, clearUndo]
   )
 
   const mutate = useCallback(
@@ -283,6 +311,9 @@ export default function App(): JSX.Element {
       savesInFlight.current++
       try {
         const snap = await appendEntry({ ...req, enteredBy: s.enteredBy }, s.code)
+        // An append changes data outside the admin-mutation model — undoing past it
+        // would delete the appended result, so old snapshots stop being safe here.
+        clearUndo()
         setSnap(snap.data, snap.sha)
         return snap.data
       } catch (e) {
@@ -290,7 +321,7 @@ export default function App(): JSX.Element {
           handleAuthError()
         } else if (e instanceof ApiError && e.status === 409) {
           toast(e.message, 'error')
-          void refresh()
+          void refresh({ force: true })
         } else {
           toast(`Save failed: ${e instanceof Error ? e.message : e}`, 'error')
         }
@@ -299,7 +330,7 @@ export default function App(): JSX.Element {
         savesInFlight.current--
       }
     },
-    [setSnap, toast, refresh, handleAuthError]
+    [setSnap, toast, refresh, handleAuthError, clearUndo]
   )
 
   const season = useMemo(() => (data ? activeSeason(data) : null), [data])
@@ -310,7 +341,7 @@ export default function App(): JSX.Element {
       <div style={{ padding: 40, color: '#b8ad98', maxWidth: 480 }}>
         <h2 style={{ color: '#f2ead8', marginBottom: 10 }}>Couldn&apos;t load the league</h2>
         <p style={{ marginBottom: 16 }}>{loadError}</p>
-        <button className="btn primary" onClick={() => void refresh(false)}>
+        <button className="btn primary" onClick={() => void refresh({ showError: true })}>
           Try again
         </button>
       </div>
@@ -337,6 +368,9 @@ export default function App(): JSX.Element {
   }
 
   const nav = NAV.filter((n) => n.id !== 'add' || role !== 'viewer')
+  // A viewer can land on 'add' via ?screen=add or by signing out while on it —
+  // fall back to the table rather than an empty pane.
+  const shown: ScreenId = screen === 'add' && role === 'viewer' ? 'table' : screen
 
   return (
     <Ctx.Provider value={ctx}>
@@ -350,7 +384,7 @@ export default function App(): JSX.Element {
           {nav.map((n) => (
             <button
               key={n.id}
-              className={`nav-btn ${screen === n.id ? 'active' : ''}`}
+              className={`nav-btn ${shown === n.id ? 'active' : ''}`}
               onClick={() => setScreen(n.id)}
             >
               {n.icon}
@@ -383,12 +417,12 @@ export default function App(): JSX.Element {
           </div>
         </nav>
         <main className="main">
-          {screen === 'table' && <LeagueTableScreen />}
-          {screen === 'add' && role !== 'viewer' && <AddResultScreen />}
-          {screen === 'history' && <HistoryScreen />}
-          {screen === 'charts' && <ChartsScreen />}
-          {screen === 'players' && <PlayersScreen />}
-          {screen === 'settings' && <SettingsScreen />}
+          {shown === 'table' && <LeagueTableScreen />}
+          {shown === 'add' && <AddResultScreen />}
+          {shown === 'history' && <HistoryScreen />}
+          {shown === 'charts' && <ChartsScreen />}
+          {shown === 'players' && <PlayersScreen />}
+          {shown === 'settings' && <SettingsScreen />}
         </main>
         <div className="toasts">
           {toasts.map((t) => (

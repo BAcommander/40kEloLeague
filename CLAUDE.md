@@ -99,7 +99,8 @@ The old sheet had silent data-entry bugs the importer now normalizes:
    some as dd/mm *serials*, so the wrong date is baked into the cell and invisible to
    text parsing. The importer repairs any imported date in the future by swapping
    day/month when that lands in the past, and flags each in the report notes. The Add
-   Result form (and the worker) also reject future dates outright.
+   Result form rejects future dates outright; the worker does too but allows one day
+   of slack so a timezone difference can't reject a legitimate same-day result.
 
 Corrected results: Allan 1017→1032, Andrew 1011→982 (±1 knock-ons for John/Kev).
 The reconciliation report is stored on `LeagueData.importReport` and shown in Settings.

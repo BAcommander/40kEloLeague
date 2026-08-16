@@ -101,6 +101,9 @@ function pickFile(accept: string): Promise<File | null> {
     input.type = 'file'
     input.accept = accept
     input.onchange = () => res(input.files?.[0] ?? null)
+    // Dismissing the dialog fires 'cancel' (Chromium 113+) — without this the promise
+    // never settles and the caller's await dangles forever.
+    input.oncancel = () => res(null)
     input.click()
   })
 }
