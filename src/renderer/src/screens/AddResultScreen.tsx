@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react'
-import type { GameResult, GuestGame, MatchGame, Season, TournamentEntry } from '@shared/types'
+import type { GameResult, GuestGame, MatchGame, Player, Season, SeasonComputation, TournamentEntry } from '@shared/types'
+import type { AppendKind, AppendRequest } from '@shared/protocol'
 import { computeSeason } from '@shared/engine'
 import { useApp } from '../App'
-import { DISPOSITIONS, FACTIONS, nextSeq, todayIso, uid, updateSeason } from '../lib'
+import { DISPOSITIONS, FACTIONS, todayIso, uid, updateSeason } from '../lib'
 
 type Tab = 'Match' | 'Tournament' | 'Guest'
 
@@ -95,14 +96,14 @@ function FactionInput(props: {
 function PlayerSelect(props: {
   label: string
   value: string
+  players: Player[]
   exclude?: string
   onChange: (id: string) => void
   onAddPlayer: (name: string) => string
 }): JSX.Element {
-  const { season } = useApp()
   const [adding, setAdding] = useState(false)
   const [newName, setNewName] = useState('')
-  const players = [...season.players].sort((a, b) => a.name.localeCompare(b.name))
+  const players = [...props.players].sort((a, b) => a.name.localeCompare(b.name))
   return (
     <div className="field">
       <label>{props.label}</label>
@@ -211,7 +212,12 @@ export interface EditTarget {
 }
 
 export function EventEditor(props: { edit?: EditTarget; onDone?: () => void }): JSX.Element {
-  const { season, mutate, toast } = useApp()
+  const { season, mutate, append, toast } = useApp()
+
+  // Players created inline while filling the form; sent with the save in one
+  // request (add mode) or inserted alongside the edit (admin edit mode).
+  const [pendingPlayers, setPendingPlayers] = useState<Player[]>([])
+  const [saving, setSaving] = useState(false)
 
   const editing = props.edit
   const existingMatch = editing?.type === 'Match' ? season.matches.find((m) => m.id === editing.id) : undefined
@@ -252,9 +258,13 @@ export function EventEditor(props: { edit?: EditTarget; onDone?: () => void }): 
   const [guestName, setGuestName] = useState(existingGuest?.guestName ?? '')
   const [guestElo, setGuestElo] = useState(existingGuest?.guestElo?.toString() ?? '1000')
 
+  const allPlayers = useMemo(() => [...season.players, ...pendingPlayers], [season.players, pendingPlayers])
+
   const addPlayer = (name: string): string => {
+    const existing = allPlayers.find((p) => p.name.trim().toLowerCase() === name.toLowerCase())
+    if (existing) return existing.id
     const id = uid('p')
-    mutate((d) => updateSeason(d, season.id, (s) => ({ ...s, players: [...s.players, { id, name }] })))
+    setPendingPlayers((ps) => [...ps, { id, name }])
     return id
   }
 
@@ -283,27 +293,62 @@ export function EventEditor(props: { edit?: EditTarget; onDone?: () => void }): 
     return true
   }
 
-  /** Save, then toast the resulting ELO movements for the players involved. */
-  const commit = (mutateSeason: (s: Season) => Season, involved: string[], newEventId: string): void => {
-    mutate((d) => updateSeason(d, season.id, mutateSeason))
-    // Compute on the mutated season for the toast.
-    const nextSeason = mutateSeason(season)
-    const comp = computeSeason(nextSeason)
-    const before = computeSeason(season)
-    const lines = involved
+  const eloLines = (
+    involved: string[],
+    seasonAfter: Season,
+    before: SeasonComputation,
+    after: SeasonComputation
+  ): string =>
+    involved
       .filter(Boolean)
       .map((pid) => {
-        const name = nextSeason.players.find((p) => p.id === pid)?.name ?? pid
+        const name = seasonAfter.players.find((p) => p.id === pid)?.name ?? pid
         const oldElo = before.table.find((p) => p.playerId === pid)?.elo
-        const newElo = comp.table.find((p) => p.playerId === pid)?.elo
-        if (oldElo === undefined || newElo === undefined) return `${name}: —`
+        const newElo = after.table.find((p) => p.playerId === pid)?.elo
+        if (newElo === undefined) return `${name}: —`
+        if (oldElo === undefined) return `${name}: ${newElo}`
         const d = newElo - oldElo
         return `${name}: ${oldElo} → ${newElo} (${d >= 0 ? '+' : ''}${d})`
       })
       .join('\n')
-    toast(`${editing ? 'Result updated' : 'Result saved'}\n${lines}`)
-    void newEventId
+
+  /** Edit mode (admin): apply in place via a full-document save. */
+  const commitEdit = (mutateSeason: (s: Season) => Season, involved: string[]): void => {
+    const withPlayers = (s: Season): Season =>
+      mutateSeason({
+        ...s,
+        players: [...s.players, ...pendingPlayers.filter((p) => !s.players.some((x) => x.id === p.id))]
+      })
+    mutate((d) => updateSeason(d, season.id, withPlayers))
+    const nextSeason = withPlayers(season)
+    toast(`Result updated\n${eloLines(involved, nextSeason, computeSeason(season), computeSeason(nextSeason))}`)
+    setPendingPlayers([])
     props.onDone?.()
+  }
+
+  /**
+   * Add mode: append via the API. The server applies it to the latest data, so
+   * the ELO toast is computed from the returned document — correct even if
+   * someone else added a result in between.
+   */
+  const commitAdd = async (kind: AppendKind, entry: AppendRequest['entry'], involved: string[]): Promise<void> => {
+    if (saving) return
+    setSaving(true)
+    try {
+      const before = computeSeason(season)
+      const newData = await append({ seasonId: season.id, kind, entry, newPlayers: pendingPlayers })
+      if (!newData) return // failure already toasted by the app shell
+      const nextSeason = newData.seasons.find((s) => s.id === season.id)
+      if (nextSeason) {
+        toast(`Result saved\n${eloLines(involved, nextSeason, before, computeSeason(nextSeason))}`)
+      } else {
+        toast('Result saved')
+      }
+      setPendingPlayers([])
+      props.onDone?.()
+    } finally {
+      setSaving(false)
+    }
   }
 
   const saveMatch = (): void => {
@@ -312,9 +357,8 @@ export function EventEditor(props: { edit?: EditTarget; onDone?: () => void }): 
       return
     }
     if (!dateOk()) return
-    const id = existingMatch?.id ?? uid('m')
-    const entry: MatchGame = {
-      id,
+    const base: Omit<MatchGame, 'seq'> = {
+      id: existingMatch?.id ?? uid('m'),
       date,
       p1,
       p2,
@@ -326,16 +370,14 @@ export function EventEditor(props: { edit?: EditTarget; onDone?: () => void }): 
       disposition1: disp1.trim() || undefined,
       disposition2: disp2.trim() || undefined,
       notes: notes.trim() || undefined,
-      seq: existingMatch?.seq ?? nextSeq(season)
+      enteredBy: existingMatch?.enteredBy
     }
-    commit(
-      (s) => ({
-        ...s,
-        matches: existingMatch ? s.matches.map((m) => (m.id === id ? entry : m)) : [...s.matches, entry]
-      }),
-      [p1, p2],
-      id
-    )
+    if (existingMatch) {
+      const entry: MatchGame = { ...base, seq: existingMatch.seq }
+      commitEdit((s) => ({ ...s, matches: s.matches.map((m) => (m.id === entry.id ? entry : m)) }), [p1, p2])
+    } else {
+      void commitAdd('match', base, [p1, p2])
+    }
   }
 
   const saveTournament = (): void => {
@@ -357,9 +399,8 @@ export function EventEditor(props: { edit?: EditTarget; onDone?: () => void }): 
       return
     }
     if (!dateOk()) return
-    const id = existingTournament?.id ?? uid('t')
-    const entry: TournamentEntry = {
-      id,
+    const base: Omit<TournamentEntry, 'seq'> = {
+      id: existingTournament?.id ?? uid('t'),
       date,
       tournament: tourney.trim() || 'Tournament',
       player: tPlayer,
@@ -372,18 +413,17 @@ export function EventEditor(props: { edit?: EditTarget; onDone?: () => void }): 
       faction: tFaction.trim() || undefined,
       disposition: tDisposition.trim() || undefined,
       notes: notes.trim() || undefined,
-      seq: existingTournament?.seq ?? nextSeq(season)
+      enteredBy: existingTournament?.enteredBy
     }
-    commit(
-      (s) => ({
-        ...s,
-        tournamentEntries: existingTournament
-          ? s.tournamentEntries.map((t) => (t.id === id ? entry : t))
-          : [...s.tournamentEntries, entry]
-      }),
-      [tPlayer],
-      id
-    )
+    if (existingTournament) {
+      const entry: TournamentEntry = { ...base, seq: existingTournament.seq }
+      commitEdit(
+        (s) => ({ ...s, tournamentEntries: s.tournamentEntries.map((t) => (t.id === entry.id ? entry : t)) }),
+        [tPlayer]
+      )
+    } else {
+      void commitAdd('tournament', base, [tPlayer])
+    }
   }
 
   const saveGuest = (): void => {
@@ -392,9 +432,8 @@ export function EventEditor(props: { edit?: EditTarget; onDone?: () => void }): 
       return
     }
     if (!dateOk()) return
-    const id = existingGuest?.id ?? uid('g')
-    const entry: GuestGame = {
-      id,
+    const base: Omit<GuestGame, 'seq'> = {
+      id: existingGuest?.id ?? uid('g'),
       date,
       player: tPlayer,
       result,
@@ -406,16 +445,14 @@ export function EventEditor(props: { edit?: EditTarget; onDone?: () => void }): 
       guestName: guestName.trim(),
       guestElo: num(guestElo),
       notes: notes.trim() || undefined,
-      seq: existingGuest?.seq ?? nextSeq(season)
+      enteredBy: existingGuest?.enteredBy
     }
-    commit(
-      (s) => ({
-        ...s,
-        guestGames: existingGuest ? s.guestGames.map((g) => (g.id === id ? entry : g)) : [...s.guestGames, entry]
-      }),
-      [tPlayer],
-      id
-    )
+    if (existingGuest) {
+      const entry: GuestGame = { ...base, seq: existingGuest.seq }
+      commitEdit((s) => ({ ...s, guestGames: s.guestGames.map((g) => (g.id === entry.id ? entry : g)) }), [tPlayer])
+    } else {
+      void commitAdd('guest', base, [tPlayer])
+    }
   }
 
   const tournamentNames = [...new Set(season.tournamentEntries.map((t) => t.tournament))]
@@ -446,6 +483,7 @@ export function EventEditor(props: { edit?: EditTarget; onDone?: () => void }): 
               <PlayerSelect
                 label="Player 1"
                 value={p1}
+                players={allPlayers}
                 exclude={p2}
                 onChange={(id) => {
                   setP1(id)
@@ -457,6 +495,7 @@ export function EventEditor(props: { edit?: EditTarget; onDone?: () => void }): 
               <PlayerSelect
                 label="Player 2"
                 value={p2}
+                players={allPlayers}
                 exclude={p1}
                 onChange={(id) => {
                   setP2(id)
@@ -490,8 +529,8 @@ export function EventEditor(props: { edit?: EditTarget; onDone?: () => void }): 
               </div>
             </div>
             <div style={{ marginTop: 18 }}>
-              <button className="btn primary" onClick={saveMatch}>
-                {editing ? 'Save changes' : 'Save match'}
+              <button className="btn primary" disabled={saving} onClick={saveMatch}>
+                {saving ? 'Saving…' : editing ? 'Save changes' : 'Save match'}
               </button>
             </div>
           </>
@@ -526,6 +565,7 @@ export function EventEditor(props: { edit?: EditTarget; onDone?: () => void }): 
               <PlayerSelect
                 label="Player"
                 value={tPlayer}
+                players={allPlayers}
                 onChange={(id) => {
                   setTPlayer(id)
                   pickFaction(id, setTFaction, tFaction)
@@ -553,8 +593,8 @@ export function EventEditor(props: { edit?: EditTarget; onDone?: () => void }): 
               </div>
             </div>
             <div style={{ marginTop: 18 }}>
-              <button className="btn primary" onClick={saveTournament}>
-                {editing ? 'Save changes' : 'Save tournament result'}
+              <button className="btn primary" disabled={saving} onClick={saveTournament}>
+                {saving ? 'Saving…' : editing ? 'Save changes' : 'Save tournament result'}
               </button>
             </div>
           </>
@@ -575,6 +615,7 @@ export function EventEditor(props: { edit?: EditTarget; onDone?: () => void }): 
               <PlayerSelect
                 label="League player"
                 value={tPlayer}
+                players={allPlayers}
                 onChange={(id) => {
                   setTPlayer(id)
                   pickFaction(id, setF1, f1)
@@ -605,8 +646,8 @@ export function EventEditor(props: { edit?: EditTarget; onDone?: () => void }): 
               </div>
             </div>
             <div style={{ marginTop: 18 }}>
-              <button className="btn primary" onClick={saveGuest}>
-                {editing ? 'Save changes' : 'Save guest game'}
+              <button className="btn primary" disabled={saving} onClick={saveGuest}>
+                {saving ? 'Saving…' : editing ? 'Save changes' : 'Save guest game'}
               </button>
             </div>
           </>
@@ -617,14 +658,14 @@ export function EventEditor(props: { edit?: EditTarget; onDone?: () => void }): 
 }
 
 export default function AddResultScreen(): JSX.Element {
-  const { canUndo, undo } = useApp()
+  const { canUndo, undo, role } = useApp()
   return (
     <div>
       <div className="screen-head">
         <h1>Add Result</h1>
         <span className="sub">ELO updates instantly when you save</span>
         <span className="spacer" />
-        {canUndo && (
+        {canUndo && role === 'admin' && (
           <button className="btn small" onClick={undo}>
             Undo last change
           </button>

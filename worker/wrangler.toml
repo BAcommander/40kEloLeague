@@ -1,0 +1,13 @@
+name = "pkh-league-api"
+main = "index.ts"
+compatibility_date = "2026-08-01"
+
+# Non-secret config. Secrets are set with `npx wrangler secret put <NAME>`:
+#   GITHUB_TOKEN  — fine-grained PAT, this repo only, Contents: read+write
+#   MEMBER_CODE   — shared code that lets league members add results
+#   ADMIN_CODE    — code for admins (edits, deletes, settings)
+[vars]
+GH_REPO = "BAcommander/40kEloLeague"
+DATA_BRANCH = "data"
+DATA_PATH = "league-data.json"
+ALLOWED_ORIGINS = "https://bacommander.github.io,http://localhost:5173,http://127.0.0.1:5173"

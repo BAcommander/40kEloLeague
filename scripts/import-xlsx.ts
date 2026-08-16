@@ -1,5 +1,6 @@
 /**
- * Dev-time: parse the original league workbook into the app's bundled seed data.
+ * Dev-time: parse the original league workbook into the dev-mode seed data
+ * (used by the browser app's local fallback when no worker is configured).
  * Usage: npm run import:xlsx [path-to-xlsx]
  */
 import { readFileSync, writeFileSync } from 'fs'
@@ -9,7 +10,7 @@ import { computeSeason } from '../src/shared/engine'
 import type { LeagueData } from '../src/shared/types'
 
 const src = process.argv[2] ?? 'C:/Users/jazzs/Downloads/W40K_ELO_League_v2.xlsx'
-const out = resolve(__dirname, '../src/main/seed.json')
+const out = resolve(__dirname, '../src/renderer/src/devSeed.json')
 
 const { season, report } = importWorkbook(new Uint8Array(readFileSync(src)))
 

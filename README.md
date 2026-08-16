@@ -1,25 +1,37 @@
 # PKH League — W40K ELO League Tracker
 
-A Windows desktop app that replaces the `W40K_ELO_League` Excel spreadsheet. All the
-league's history is already loaded, the ELO maths is identical to the spreadsheet, and
-everything recalculates automatically when you add, edit or delete a result.
+The league's web app — it replaced the `W40K_ELO_League` Excel spreadsheet (and the
+desktop app that came in between). All the league's history is loaded, the ELO maths is
+identical to the spreadsheet, and everything recalculates automatically when a result is
+added, edited or deleted.
 
-## For Miles — daily use
+**Live site**: `https://bacommander.github.io/40kEloLeague/` — anyone with the link can
+view the table (streams can use it as an OBS browser source; it refreshes itself every
+minute).
 
-1. **Install**: run `PKH League Setup 1.0.0.exe` once (or just double-click the portable
-   `PKH League 1.0.0.exe` — no install needed).
-2. **After a game night**: open the app → **Add Result** → pick the players, result and
-   battle points → **Save**. That's it — the league table, every ELO and all the charts
-   update instantly, and a toast shows exactly how much each player's ELO moved.
-3. **Share the table**: **League Table → Copy image**, then paste straight into WhatsApp.
-   (Or **Share as image** to save the PNG.)
-4. **Made a mistake?** **History** lists every game ever played — Edit or Delete any of
-   them and the whole league recalculates as if it had always been right. There's also an
-   **Undo last change** button.
+## How it works
 
-Everything saves automatically to your PC (Settings → Data shows where). The last 20
-versions are kept as backups, and **Settings → Export backup** makes a file you can move
-to another computer or send to someone.
+- The **frontend** is served free by GitHub Pages from this repo (`master` branch, built
+  by the Actions workflow).
+- The **league data** is a single JSON file on this repo's **`data` branch** — every
+  result is a git commit, so the full history of the league is the git history and
+  nothing can ever be lost.
+- A tiny **Cloudflare Worker** (`worker/`) is the write gate: it holds the GitHub token
+  and the league codes. Members' appends are applied server-side against the latest
+  data, so two people uploading at once can never lose each other's games.
+
+## Daily use
+
+1. Open the site → **Enter league code** (bottom left, one time per device) → pick your
+   name.
+2. **Add Result** → players, result, battle points → **Save**. The table, ELOs and
+   charts update instantly and a toast shows exactly how much each ELO moved.
+3. **Share the table**: League Table → **Copy image**, paste straight into WhatsApp.
+4. **Made a mistake?** Ask an admin — with the admin code, every game in **History** can
+   be edited or deleted and the whole league recalculates as if it had always been right.
+
+Roles: no code = view only · member code = add results (and new players) · admin code =
+everything (edits, deletes, seasons, settings, backups).
 
 ## What's tracked
 
@@ -49,10 +61,14 @@ from the last Excel table (see **Settings → Original import report**):
 ```bash
 npm install
 npm test              # ELO engine verified against the original spreadsheet's own numbers
-npm run dev           # run with hot reload
-npm run import:xlsx   # regenerate seed data from the original workbook
-npm run dist          # build portable exe + installer into dist/
+npm run dev           # local dev — runs against an in-memory copy of the seed data
+                      #   (codes: "member" / "admin"); set VITE_WORKER_URL to hit a real worker
+npm run build         # production build into dist-web/
+npm run worker:dev    # run the API worker locally (wrangler)
+npm run worker:deploy # deploy the API worker to Cloudflare
+npm run import:xlsx   # regenerate dev seed data from the original workbook
 ```
 
-Stack: Electron + Vite + React + TypeScript. The ELO engine (`src/shared/engine.ts`) is
-pure and event-sourced: raw results in, full replay out — no stored derived state.
+Stack: Vite + React + TypeScript, Cloudflare Worker API, GitHub Contents API storage.
+The ELO engine (`src/shared/engine.ts`) is pure and event-sourced: raw results in, full
+replay out — no stored derived state. Deploys happen automatically on push to `master`.

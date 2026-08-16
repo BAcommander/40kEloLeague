@@ -5,7 +5,7 @@ import { fmtDate, updateSeason } from '../lib'
 import { EventEditor, type EditTarget } from './AddResultScreen'
 
 export default function HistoryScreen(): JSX.Element {
-  const { season, comp, mutate, toast, canUndo, undo } = useApp()
+  const { season, comp, mutate, toast, canUndo, undo, role } = useApp()
   const [filterPlayer, setFilterPlayer] = useState('')
   const [filterType, setFilterType] = useState('')
   const [editing, setEditing] = useState<EditTarget | null>(null)
@@ -41,7 +41,7 @@ export default function HistoryScreen(): JSX.Element {
           {comp.timeline.length} events · every edit recalculates the whole league
         </span>
         <span className="spacer" />
-        {canUndo && (
+        {canUndo && role === 'admin' && (
           <button className="btn small" onClick={undo}>
             Undo last change
           </button>
@@ -93,12 +93,16 @@ export default function HistoryScreen(): JSX.Element {
               {e.delta}
             </span>
             <span style={{ display: 'flex', gap: 6 }}>
-              <button className="btn small" onClick={() => setEditing({ type: e.type, id: e.sourceId })}>
-                Edit
-              </button>
-              <button className="btn small danger" onClick={() => setConfirmDelete(e)}>
-                Delete
-              </button>
+              {role === 'admin' && (
+                <>
+                  <button className="btn small" onClick={() => setEditing({ type: e.type, id: e.sourceId })}>
+                    Edit
+                  </button>
+                  <button className="btn small danger" onClick={() => setConfirmDelete(e)}>
+                    Delete
+                  </button>
+                </>
+              )}
             </span>
           </div>
         ))}

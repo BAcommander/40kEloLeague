@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import type { ImportReport, LeagueData, Season } from '@shared/types'
-import { computeSeason, DEFAULT_MIN_RANKED_GAMES, DEFAULT_START_ELO, excelRound } from '@shared/engine'
+import { DEFAULT_MIN_RANKED_GAMES, DEFAULT_START_ELO, excelRound } from '@shared/engine'
 import { useApp } from '../App'
-import { api } from '../api'
-import { fmtDate, uid, updateSeason } from '../lib'
+import { downloadJson, importJsonFile, importXlsxFile } from '../remote'
+import { fmtDate, todayIso, uid, updateSeason } from '../lib'
 
 function ReportView({ report }: { report: ImportReport }): JSX.Element {
   return (
@@ -54,7 +54,7 @@ function ReportView({ report }: { report: ImportReport }): JSX.Element {
 }
 
 export default function SettingsScreen(): JSX.Element {
-  const { data, season, comp, mutate, replaceData, toast } = useApp()
+  const { data, season, comp, mutate, replaceData, toast, role } = useApp()
   const [leagueName, setLeagueName] = useState(data.settings.leagueName)
   const [showReport, setShowReport] = useState(false)
   const [newSeasonOpen, setNewSeasonOpen] = useState(false)
@@ -76,14 +76,14 @@ export default function SettingsScreen(): JSX.Element {
     toast(`Players now need ${n} game${n === 1 ? '' : 's'} to appear in the rankings`)
   }
 
-  const exportJson = async (): Promise<void> => {
-    const path = await api.exportFile(data)
-    if (path) toast(`Backup exported:\n${path}`)
+  const exportJson = (): void => {
+    downloadJson(data, `pkh-league-${todayIso()}.json`)
+    toast('Backup downloaded')
   }
 
   const importJson = async (): Promise<void> => {
     try {
-      const imported = await api.importFile()
+      const imported = await importJsonFile()
       if (imported) {
         replaceData(imported)
         toast('League data restored from backup')
@@ -95,7 +95,7 @@ export default function SettingsScreen(): JSX.Element {
 
   const importExcel = async (): Promise<void> => {
     try {
-      const result = await api.importXlsx()
+      const result = await importXlsxFile()
       if (result) setPendingImport(result)
     } catch (e) {
       toast(`Excel import failed: ${(e as Error).message}`, 'error')
@@ -114,10 +114,6 @@ export default function SettingsScreen(): JSX.Element {
     replaceData(next)
     toast('Excel data imported — league rebuilt from the workbook')
     setPendingImport(null)
-  }
-
-  const revealFile = (): void => {
-    void api.revealDataFile()
   }
 
   const createSeason = (): void => {
@@ -159,6 +155,8 @@ export default function SettingsScreen(): JSX.Element {
       </div>
 
       <div className="settings-list">
+        {role === 'admin' && (
+          <>
         <div className="card">
           <h2>League</h2>
           <div className="setting-item" style={{ marginTop: 10 }}>
@@ -236,8 +234,8 @@ export default function SettingsScreen(): JSX.Element {
             <div className="grow">
               <div className="name">Backup & restore</div>
               <div className="desc">
-                The league saves automatically after every change, with the last 20 versions kept as backups. Export a
-                file to move to another PC or share with someone.
+                Every change is saved as a commit in the league&apos;s GitHub history, so nothing is ever lost. You can
+                also download a snapshot file or restore one.
               </div>
             </div>
             <button className="btn small" onClick={exportJson}>
@@ -245,15 +243,6 @@ export default function SettingsScreen(): JSX.Element {
             </button>
             <button className="btn small" onClick={importJson}>
               Restore backup
-            </button>
-          </div>
-          <div className="setting-item" style={{ marginTop: 12 }}>
-            <div className="grow">
-              <div className="name">Data file</div>
-              <div className="desc">Where everything lives on this PC.</div>
-            </div>
-            <button className="btn small" onClick={revealFile}>
-              Show in folder
             </button>
           </div>
           <div className="setting-item" style={{ marginTop: 12 }}>
@@ -267,18 +256,19 @@ export default function SettingsScreen(): JSX.Element {
               Import .xlsx
             </button>
           </div>
-          {data.importReport && (
-            <div className="setting-item" style={{ marginTop: 12 }}>
-              <div className="grow">
-                <div className="name">Original import report</div>
-                <div className="desc">What changed vs the old spreadsheet when this league was first imported.</div>
-              </div>
-              <button className="btn small" onClick={() => setShowReport(true)}>
-                View report
-              </button>
-            </div>
-          )}
         </div>
+          </>
+        )}
+
+        {role !== 'admin' && (
+          <div className="card">
+            <h2>League settings</h2>
+            <p className="hint" style={{ marginBottom: 0 }}>
+              Backups, seasons and league options are managed by the admins
+              {role === 'viewer' ? ' — enter the league code (bottom left) to add results' : ''}.
+            </p>
+          </div>
+        )}
 
         <div className="card">
           <h2>ELO rules</h2>
@@ -288,6 +278,20 @@ export default function SettingsScreen(): JSX.Element {
             spreadsheet exactly.
           </p>
         </div>
+
+        {data.importReport && (
+          <div className="card">
+            <h2>Original import report</h2>
+            <div className="setting-item" style={{ marginTop: 10 }}>
+              <div className="grow">
+                <div className="desc">What changed vs the old spreadsheet when this league was first imported.</div>
+              </div>
+              <button className="btn small" onClick={() => setShowReport(true)}>
+                View report
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {showReport && data.importReport && (

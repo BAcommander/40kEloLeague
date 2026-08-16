@@ -1,17 +1,17 @@
 {
   "name": "pkh-league",
-  "productName": "PKH League",
-  "version": "1.1.0",
-  "description": "Warhammer 40K ELO League tracker",
-  "main": "out/main/index.js",
+  "version": "2.0.0",
+  "description": "Warhammer 40K ELO League tracker — web app",
   "author": "PKH League",
   "private": true,
   "scripts": {
-    "dev": "electron-vite dev",
-    "build": "electron-vite build",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
     "test": "vitest run",
     "import:xlsx": "tsx scripts/import-xlsx.ts",
-    "dist": "electron-vite build && electron-builder --win"
+    "worker:dev": "npx wrangler dev -c worker/wrangler.toml",
+    "worker:deploy": "npx wrangler deploy -c worker/wrangler.toml"
   },
   "dependencies": {
     "html-to-image": "^1.11.11",
@@ -21,36 +21,14 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20241127.0",
+    "@types/node": "^22.10.0",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.4",
-    "electron": "^33.2.0",
-    "electron-builder": "^25.1.8",
-    "electron-vite": "^2.3.0",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2",
     "vite": "^5.4.11",
     "vitest": "^2.1.8"
-  },
-  "build": {
-    "appId": "com.pkhleague.app",
-    "productName": "PKH League",
-    "directories": {
-      "output": "dist"
-    },
-    "files": [
-      "out/**"
-    ],
-    "win": {
-      "icon": "build/icon.png",
-      "target": [
-        "portable",
-        "nsis"
-      ]
-    },
-    "nsis": {
-      "oneClick": true,
-      "deleteAppDataOnUninstall": false
-    }
   }
 }

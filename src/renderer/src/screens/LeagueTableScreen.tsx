@@ -1,9 +1,9 @@
 import { useMemo, useRef, useState } from 'react'
-import { toPng } from 'html-to-image'
+import { toBlob, toPng } from 'html-to-image'
 import { computeSeason, DEFAULT_MIN_RANKED_GAMES } from '@shared/engine'
 import type { Season } from '@shared/types'
 import { useApp } from '../App'
-import { api } from '../api'
+import { copyPngToClipboard, downloadDataUrl } from '../remote'
 import { fmtDate, fmtPct, todayIso } from '../lib'
 import ShareCard from '../components/ShareCard'
 
@@ -49,18 +49,39 @@ export default function LeagueTableScreen(): JSX.Element {
     }
   }
 
+  const pngName = (): string => `${data.settings.leagueName.replace(/\s+/g, '-')}-${todayIso()}.png`
+
   const savePng = async (): Promise<void> => {
     const url = await renderPng()
     if (!url) return
-    const path = await api.savePng(url, `${data.settings.leagueName.replace(/\s+/g, '-')}-${todayIso()}.png`)
-    if (path) toast(`Image saved:\n${path}`)
+    downloadDataUrl(url, pngName())
+    toast('Image downloaded — check your Downloads folder')
   }
 
-  const copyPng = async (): Promise<void> => {
-    const url = await renderPng()
-    if (!url) return
-    await api.copyPng(url)
-    toast('League table image copied to clipboard — paste it straight into WhatsApp')
+  /** Kicked off synchronously from the click so the clipboard keeps its user-gesture window. */
+  const copyPng = (): void => {
+    const node = cardRef.current
+    if (!node) return
+    setExporting(true)
+    const render = (): Promise<Blob> =>
+      toBlob(node, { pixelRatio: 2, cacheBust: true }).then((b) => {
+        if (!b) throw new Error('Could not render the image')
+        return b
+      })
+    copyPngToClipboard(render)
+      .then(async (ok) => {
+        if (ok) {
+          toast('League table image copied to clipboard — paste it straight into WhatsApp')
+        } else {
+          // Clipboard unavailable (e.g. Firefox settings) — download instead.
+          const url = await renderPng()
+          if (url) {
+            downloadDataUrl(url, pngName())
+            toast('Copying isn’t supported in this browser — the image was downloaded instead')
+          }
+        }
+      })
+      .finally(() => setExporting(false))
   }
 
   return (

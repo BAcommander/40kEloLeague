@@ -19,6 +19,8 @@ export interface MatchGame {
   disposition1?: string
   disposition2?: string
   notes?: string
+  /** Who submitted this result (web app; informational only). */
+  enteredBy?: string
   /** Stable entry order; replicates the spreadsheet's row-based tie-break within a day. */
   seq: number
 }
@@ -39,6 +41,8 @@ export interface TournamentEntry {
   faction?: string
   disposition?: string
   notes?: string
+  /** Who submitted this result (web app; informational only). */
+  enteredBy?: string
   seq: number
 }
 
@@ -56,6 +60,8 @@ export interface GuestGame {
   guestName: string
   guestElo?: number // defaults to 1000
   notes?: string
+  /** Who submitted this result (web app; informational only). */
+  enteredBy?: string
   seq: number
 }
 

@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:"
+      content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://*.workers.dev http://localhost:8787 http://127.0.0.1:8787 ws://localhost:5173 ws://127.0.0.1:5173"
     />
+    <link rel="icon" type="image/png" href="./icon.png" />
     <title>PKH League</title>
   </head>
   <body>

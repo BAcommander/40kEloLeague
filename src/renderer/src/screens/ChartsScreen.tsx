@@ -14,7 +14,7 @@ import {
 } from 'recharts'
 import { toPng } from 'html-to-image'
 import { useApp } from '../App'
-import { api } from '../api'
+import { downloadDataUrl } from '../remote'
 import { fmtDate, SERIES, WDL } from '../lib'
 
 const SURFACE = '#201b16'
@@ -41,8 +41,8 @@ function ChartCard(props: {
   const exportPng = async (): Promise<void> => {
     if (!ref.current) return
     const url = await toPng(ref.current, { pixelRatio: 2, backgroundColor: SURFACE })
-    const path = await api.savePng(url, `${props.exportName}.png`)
-    if (path) toast(`Chart saved:\n${path}`)
+    downloadDataUrl(url, `${props.exportName}.png`)
+    toast('Chart downloaded')
   }
   return (
     <div className="card" ref={ref}>

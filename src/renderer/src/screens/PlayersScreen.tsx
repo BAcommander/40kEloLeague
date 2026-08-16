@@ -3,7 +3,7 @@ import { useApp } from '../App'
 import { fmtDate, fmtPct, uid, updateSeason } from '../lib'
 
 export default function PlayersScreen(): JSX.Element {
-  const { season, comp, mutate, toast } = useApp()
+  const { season, comp, mutate, append, toast, role } = useApp()
   const [renaming, setRenaming] = useState<string | null>(null)
   const [newName, setNewName] = useState('')
   const [adding, setAdding] = useState(false)
@@ -39,17 +39,15 @@ export default function PlayersScreen(): JSX.Element {
     setRenaming(null)
   }
 
-  const addPlayer = (): void => {
+  const addPlayer = async (): Promise<void> => {
     const name = addName.trim()
     if (!name) return
     if (season.players.some((p) => p.name.toLowerCase() === name.toLowerCase())) {
       toast('A player with that name already exists', 'error')
       return
     }
-    mutate((d) =>
-      updateSeason(d, season.id, (s) => ({ ...s, players: [...s.players, { id: uid('p'), name }] }))
-    )
-    toast(`${name} joined the league at ELO 1000`)
+    const res = await append({ seasonId: season.id, kind: 'player', entry: { id: uid('p'), name } })
+    if (res) toast(`${name} joined the league at ELO 1000`)
     setAdding(false)
     setAddName('')
   }
@@ -68,9 +66,11 @@ export default function PlayersScreen(): JSX.Element {
         <h1>Players</h1>
         <span className="sub">{season.players.length} registered</span>
         <span className="spacer" />
-        <button className="btn primary" onClick={() => setAdding(true)}>
-          Add player
-        </button>
+        {role !== 'viewer' && (
+          <button className="btn primary" onClick={() => setAdding(true)}>
+            Add player
+          </button>
+        )}
       </div>
 
       <div className="player-cards">
@@ -129,15 +129,17 @@ export default function PlayersScreen(): JSX.Element {
               <button className="btn small" onClick={() => setDetail(p.playerId)}>
                 Details
               </button>
-              <button
-                className="btn small"
-                onClick={() => {
-                  setRenaming(p.playerId)
-                  setNewName(p.name)
-                }}
-              >
-                Rename
-              </button>
+              {role === 'admin' && (
+                <button
+                  className="btn small"
+                  onClick={() => {
+                    setRenaming(p.playerId)
+                    setNewName(p.name)
+                  }}
+                >
+                  Rename
+                </button>
+              )}
             </div>
           </div>
         ))}
@@ -153,14 +155,14 @@ export default function PlayersScreen(): JSX.Element {
                 autoFocus
                 value={addName}
                 onChange={(e) => setAddName(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && addPlayer()}
+                onKeyDown={(e) => e.key === 'Enter' && void addPlayer()}
               />
             </div>
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 16 }}>
               <button className="btn small" onClick={() => setAdding(false)}>
                 Cancel
               </button>
-              <button className="btn small primary" onClick={addPlayer}>
+              <button className="btn small primary" onClick={() => void addPlayer()}>
                 Add player
               </button>
             </div>
