@@ -473,16 +473,6 @@
           "oppFaction": "Necrons",
           "guestName": "Graeme",
           "seq": 4
-        },
-        {
-          "id": "g-cutover-test",
-          "date": "2026-08-16",
-          "player": "p-john",
-          "result": "Draw",
-          "guestName": "CUTOVER TEST (will be removed)",
-          "notes": "automated cutover check",
-          "enteredBy": "cutover-check",
-          "seq": 32
         }
       ]
     }
