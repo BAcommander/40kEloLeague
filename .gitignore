@@ -5,3 +5,4 @@ dist-web/
 .wrangler/
 *.log
 .DS_Store
+.vite/
