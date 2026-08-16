@@ -10,7 +10,8 @@
  */
 import type { GameResult, GuestGame, LeagueData, MatchGame, Player, Season, TournamentEntry } from '../src/shared/types'
 import type { AppendRequest, Role } from '../src/shared/protocol'
-import { nextSeq, normName } from '../src/shared/data'
+import { activeSeason, nextSeq, normName } from '../src/shared/data'
+import { computeSeason } from '../src/shared/engine'
 
 export interface Env {
   GH_REPO: string
@@ -239,10 +240,33 @@ async function handle(req: Request, env: Env): Promise<Response> {
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors })
   const path = new URL(req.url).pathname
 
+  // Public read endpoints are CORS-open: the data is world-readable anyway, and
+  // consumers include OBS overlay pages served from arbitrary localhost origins.
+  const publicCors = { ...cors, 'Access-Control-Allow-Origin': '*' }
+
   try {
     if (path === '/league' && req.method === 'GET') {
       const { doc, sha } = await ghGet(env)
-      return json(200, { data: doc, sha }, cors)
+      return json(200, { data: doc, sha }, publicCors)
+    }
+
+    // The computed league table (engine output, not raw data) — for overlays and
+    // other read-only consumers that shouldn't have to reimplement the ELO replay.
+    if (path === '/table' && req.method === 'GET') {
+      const { doc } = await ghGet(env)
+      const season = activeSeason(doc)
+      const comp = computeSeason(season)
+      const lastEvent = comp.timeline[comp.timeline.length - 1]
+      return json(
+        200,
+        {
+          leagueName: doc.settings.leagueName,
+          seasonName: season.name,
+          updated: lastEvent?.date ?? null,
+          table: comp.table
+        },
+        publicCors
+      )
     }
 
     if (path === '/auth' && req.method === 'POST') {
