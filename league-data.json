@@ -127,6 +127,8 @@
           "bp2": 85,
           "faction1": "Necrons",
           "faction2": "Death Guard",
+          "disposition1": "Purge the Foe",
+          "disposition2": "Priority Assets",
           "seq": 8
         },
         {
