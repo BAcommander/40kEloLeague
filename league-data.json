@@ -378,6 +378,21 @@
           "faction1": "Blood Angels",
           "faction2": "Orks",
           "seq": 28
+        },
+        {
+          "id": "m-mszai21k-i3yix",
+          "date": "2026-08-19",
+          "p1": "p-miles",
+          "p2": "p-brett",
+          "result": "Win",
+          "bp1": 71,
+          "bp2": 61,
+          "faction1": "Emperors Children",
+          "faction2": "Orks",
+          "disposition1": "Reconnaissance",
+          "disposition2": "Take and Hold",
+          "enteredBy": "Miles",
+          "seq": 32
         }
       ],
       "tournamentEntries": [
