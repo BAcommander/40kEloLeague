@@ -496,6 +496,21 @@
           "oppFaction": "Necrons",
           "guestName": "Graeme",
           "seq": 4
+        },
+        {
+          "id": "g-mt196f31-cx5sk",
+          "date": "2026-08-19",
+          "player": "p-john",
+          "result": "Win",
+          "playerBP": 91,
+          "oppBP": 82,
+          "playerFaction": "Blood Angels",
+          "oppFaction": "Imperial Knights",
+          "playerDisposition": "Priority Assets",
+          "guestName": "Jonathan",
+          "guestElo": 1000,
+          "enteredBy": "John",
+          "seq": 33
         }
       ]
     }
