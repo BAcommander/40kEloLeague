@@ -393,6 +393,21 @@
           "disposition2": "Take and Hold",
           "enteredBy": "Miles",
           "seq": 32
+        },
+        {
+          "id": "m-mt3awk93-4q9f6",
+          "date": "2026-08-21",
+          "p1": "p-gav",
+          "p2": "p-pete",
+          "result": "Win",
+          "bp1": 100,
+          "bp2": 15,
+          "faction1": "Leagues of Votann",
+          "faction2": "Imperial agents",
+          "disposition1": "Reconnaissance",
+          "disposition2": "Reconnaissance",
+          "enteredBy": "Gav",
+          "seq": 34
         }
       ],
       "tournamentEntries": [
