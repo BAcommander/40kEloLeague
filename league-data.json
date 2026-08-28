@@ -438,6 +438,21 @@
           "disposition2": "Priority Assets",
           "enteredBy": "Andrew",
           "seq": 36
+        },
+        {
+          "id": "m-mtdfym1z-354fu",
+          "date": "2026-08-28",
+          "p1": "p-andrew",
+          "p2": "p-colin",
+          "result": "Loss",
+          "bp1": 97,
+          "bp2": 72,
+          "faction1": "Necrons",
+          "faction2": "Death Guard",
+          "disposition1": "Priority Assets",
+          "disposition2": "Priority Assets",
+          "enteredBy": "Andrew",
+          "seq": 37
         }
       ],
       "tournamentEntries": [
