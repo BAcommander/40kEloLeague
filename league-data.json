@@ -453,6 +453,20 @@
           "disposition2": "Priority Assets",
           "enteredBy": "Andrew",
           "seq": 37
+        },
+        {
+          "id": "m-mthrjoox-izfgm",
+          "date": "2026-08-31",
+          "p1": "p-miles",
+          "p2": "p-andrew",
+          "result": "Win",
+          "bp1": 86,
+          "bp2": 36,
+          "faction1": "Adeptus Custodes",
+          "faction2": "Necrons",
+          "disposition1": "Take and Hold",
+          "disposition2": "Take and Hold",
+          "seq": 38
         }
       ],
       "tournamentEntries": [
