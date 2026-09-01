@@ -585,6 +585,21 @@
           "guestElo": 1000,
           "enteredBy": "John",
           "seq": 33
+        },
+        {
+          "id": "g-mtj5do8u-jkcnv",
+          "date": "2026-09-01",
+          "player": "p-allan",
+          "result": "Win",
+          "playerBP": 94,
+          "oppBP": 79,
+          "playerFaction": "Adeptus Custodes",
+          "oppFaction": "Necrons",
+          "playerDisposition": "Take and hold",
+          "guestName": "Graeme",
+          "guestElo": 1000,
+          "enteredBy": "Allan",
+          "seq": 39
         }
       ]
     }
