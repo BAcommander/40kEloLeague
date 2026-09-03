@@ -467,6 +467,20 @@
           "disposition1": "Take and Hold",
           "disposition2": "Take and Hold",
           "seq": 38
+        },
+        {
+          "id": "m-mtlg82o6-ki3t6",
+          "date": "2026-09-01",
+          "p1": "p-andrew",
+          "p2": "p-colin",
+          "result": "Loss",
+          "bp1": 92,
+          "bp2": 99,
+          "faction1": "Necrons",
+          "faction2": "Death Guard",
+          "disposition1": "Reconnaissance",
+          "disposition2": "Disruption",
+          "seq": 40
         }
       ],
       "tournamentEntries": [
