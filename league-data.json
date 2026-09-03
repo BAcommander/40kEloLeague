@@ -481,6 +481,21 @@
           "disposition1": "Reconnaissance",
           "disposition2": "Disruption",
           "seq": 40
+        },
+        {
+          "id": "m-mtm6p4ek-n8zi9",
+          "date": "2026-09-03",
+          "p1": "p-gav",
+          "p2": "p-ryan",
+          "result": "Win",
+          "bp1": 100,
+          "bp2": 63,
+          "faction1": "Leagues of Votann",
+          "faction2": "Tyranids",
+          "disposition1": "Reconnaissance",
+          "disposition2": "Take and hold",
+          "enteredBy": "Gav",
+          "seq": 41
         }
       ],
       "tournamentEntries": [
