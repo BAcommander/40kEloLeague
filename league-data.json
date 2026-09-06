@@ -496,6 +496,20 @@
           "disposition2": "Take and hold",
           "enteredBy": "Gav",
           "seq": 41
+        },
+        {
+          "id": "m-mtqbjhab-hmu7u",
+          "date": "2026-09-06",
+          "p1": "p-miles",
+          "p2": "p-colin",
+          "result": "Win",
+          "bp1": 85,
+          "bp2": 73,
+          "faction1": "Adeptus Custodes",
+          "faction2": "Death Guard",
+          "disposition1": "Take and Hold",
+          "disposition2": "Disruption",
+          "seq": 42
         }
       ],
       "tournamentEntries": [
