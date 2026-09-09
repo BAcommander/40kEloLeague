@@ -525,6 +525,20 @@
           "disposition2": "Take and Hold",
           "enteredBy": "Gav",
           "seq": 43
+        },
+        {
+          "id": "m-mtuc10g2-32z5i",
+          "date": "2026-09-08",
+          "p1": "p-colin",
+          "p2": "p-andrew",
+          "result": "Win",
+          "bp1": 97,
+          "bp2": 88,
+          "faction1": "Death Guard",
+          "faction2": "Necrons",
+          "disposition1": "Priority Assets",
+          "disposition2": "Reconnaissance",
+          "seq": 44
         }
       ],
       "tournamentEntries": [
