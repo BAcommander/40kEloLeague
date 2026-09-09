@@ -510,6 +510,21 @@
           "disposition1": "Take and Hold",
           "disposition2": "Disruption",
           "seq": 42
+        },
+        {
+          "id": "m-mttdz5z0-1e68n",
+          "date": "2026-09-08",
+          "p1": "p-brett",
+          "p2": "p-ryan",
+          "result": "Win",
+          "bp1": 94,
+          "bp2": 54,
+          "faction1": "Orks",
+          "faction2": "Tyranids",
+          "disposition1": "Priority Assets",
+          "disposition2": "Take and hold",
+          "enteredBy": "Gav",
+          "seq": 43
         }
       ],
       "tournamentEntries": [
