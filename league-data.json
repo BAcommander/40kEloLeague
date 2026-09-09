@@ -539,6 +539,20 @@
           "disposition1": "Priority Assets",
           "disposition2": "Reconnaissance",
           "seq": 44
+        },
+        {
+          "id": "m-mtumywzg-3woau",
+          "date": "2026-09-09",
+          "p1": "p-miles",
+          "p2": "p-colin",
+          "result": "Win",
+          "bp1": 97,
+          "bp2": 85,
+          "faction1": "Adeptus Custodes",
+          "faction2": "Death Guard",
+          "disposition1": "Take and Hold",
+          "disposition2": "Priority Assets",
+          "seq": 45
         }
       ],
       "tournamentEntries": [
