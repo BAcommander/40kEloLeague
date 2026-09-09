@@ -553,6 +553,21 @@
           "disposition1": "Take and Hold",
           "disposition2": "Priority Assets",
           "seq": 45
+        },
+        {
+          "id": "m-mtuogdnp-l4v8z",
+          "date": "2026-09-09",
+          "p1": "p-gav",
+          "p2": "p-john",
+          "result": "Win",
+          "bp1": 91,
+          "bp2": 75,
+          "faction1": "Salamanders",
+          "faction2": "Blood Angels",
+          "disposition1": "Priority Assets",
+          "disposition2": "Priority Assets",
+          "enteredBy": "Gav",
+          "seq": 46
         }
       ],
       "tournamentEntries": [
