@@ -568,6 +568,21 @@
           "disposition2": "Priority Assets",
           "enteredBy": "Gav",
           "seq": 46
+        },
+        {
+          "id": "m-mu3bt9hi-j9r16",
+          "date": "2026-09-16",
+          "p1": "p-gav",
+          "p2": "p-brett",
+          "result": "Win",
+          "bp1": 92,
+          "bp2": 56,
+          "faction1": "Salamanders",
+          "faction2": "Orks",
+          "disposition1": "Priority Assets",
+          "disposition2": "Priority Assets",
+          "enteredBy": "Gav",
+          "seq": 47
         }
       ],
       "tournamentEntries": [
