@@ -597,6 +597,20 @@
           "disposition1": "Priority Assets",
           "disposition2": "Priority Assets",
           "seq": 48
+        },
+        {
+          "id": "m-mu4lv8sb-3ckcj",
+          "date": "2026-09-16",
+          "p1": "p-john",
+          "p2": "p-miles",
+          "result": "Win",
+          "bp1": 93,
+          "bp2": 71,
+          "faction1": "Blood Angels",
+          "faction2": "Adeptus Custodes",
+          "disposition1": "Priority Assets",
+          "disposition2": "Take and Hold",
+          "seq": 49
         }
       ],
       "tournamentEntries": [
