@@ -583,6 +583,20 @@
           "disposition2": "Priority Assets",
           "enteredBy": "Gav",
           "seq": 47
+        },
+        {
+          "id": "m-mu42yr2j-f2rjf",
+          "date": "2026-09-15",
+          "p1": "p-colin",
+          "p2": "p-andrew",
+          "result": "Win",
+          "bp1": 96,
+          "bp2": 64,
+          "faction1": "Death Guard",
+          "faction2": "Necrons",
+          "disposition1": "Priority Assets",
+          "disposition2": "Priority Assets",
+          "seq": 48
         }
       ],
       "tournamentEntries": [
