@@ -700,6 +700,21 @@
           "faction": "Emperors Children",
           "disposition": "Reconnaissance",
           "seq": 31
+        },
+        {
+          "id": "t-mu8vxejs-1l81i",
+          "date": "2026-09-19",
+          "tournament": "Brewhammer RTT8",
+          "player": "p-andrew",
+          "rounds": 3,
+          "wins": 1,
+          "draws": 1,
+          "losses": 1,
+          "vp": 241,
+          "sos": 0.59,
+          "faction": "Necrons",
+          "disposition": "Priority Assets",
+          "seq": 50
         }
       ],
       "guestGames": [
