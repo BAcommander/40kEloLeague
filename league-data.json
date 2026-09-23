@@ -611,6 +611,21 @@
           "disposition1": "Priority Assets",
           "disposition2": "Take and Hold",
           "seq": 49
+        },
+        {
+          "id": "m-muen1kq5-dgwh7",
+          "date": "2026-09-23",
+          "p1": "p-gav",
+          "p2": "p-colin",
+          "result": "Win",
+          "bp1": 82,
+          "bp2": 76,
+          "faction1": "Salamanders",
+          "faction2": "Death Guard",
+          "disposition1": "Priority Assets",
+          "disposition2": "Priority Assets",
+          "enteredBy": "Gav",
+          "seq": 51
         }
       ],
       "tournamentEntries": [
