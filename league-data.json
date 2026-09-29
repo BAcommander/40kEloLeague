@@ -626,6 +626,21 @@
           "disposition2": "Priority Assets",
           "enteredBy": "Gav",
           "seq": 51
+        },
+        {
+          "id": "m-mun9hcql-ogdqw",
+          "date": "2026-09-29",
+          "p1": "p-miles",
+          "p2": "p-ryan",
+          "result": "Win",
+          "bp1": 95,
+          "bp2": 56,
+          "faction1": "Tyranids",
+          "faction2": "Tyranids",
+          "disposition1": "Take and Hold",
+          "disposition2": "Take and Hold",
+          "enteredBy": "Miles",
+          "seq": 52
         }
       ],
       "tournamentEntries": [
