@@ -761,6 +761,22 @@
           "disposition": "Priority Assets",
           "enteredBy": "Miles",
           "seq": 53
+        },
+        {
+          "id": "t-muu11h2n-cpmcf",
+          "date": "2026-10-04",
+          "tournament": "Willem Games GT Oct 26",
+          "player": "p-gav",
+          "rounds": 5,
+          "wins": 5,
+          "draws": 0,
+          "losses": 0,
+          "vp": 490,
+          "sos": 0.65,
+          "faction": "Salamanders",
+          "disposition": "Priority Assets",
+          "enteredBy": "Miles",
+          "seq": 54
         }
       ],
       "guestGames": [
