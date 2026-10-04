@@ -745,6 +745,22 @@
           "faction": "Necrons",
           "disposition": "Priority Assets",
           "seq": 50
+        },
+        {
+          "id": "t-muu0zqf9-x2md4",
+          "date": "2026-10-04",
+          "tournament": "Willem Games GT Oct 26",
+          "player": "p-brett",
+          "rounds": 5,
+          "wins": 3,
+          "draws": 0,
+          "losses": 2,
+          "vp": 391,
+          "sos": 0.549,
+          "faction": "Orks",
+          "disposition": "Priority Assets",
+          "enteredBy": "Miles",
+          "seq": 53
         }
       ],
       "guestGames": [
