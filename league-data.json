@@ -641,6 +641,21 @@
           "disposition2": "Take and Hold",
           "enteredBy": "Miles",
           "seq": 52
+        },
+        {
+          "id": "m-muyofuln-yv7gf",
+          "date": "2026-10-07",
+          "p1": "p-miles",
+          "p2": "p-andrew",
+          "result": "Win",
+          "bp1": 100,
+          "bp2": 84,
+          "faction1": "Adeptus Custodes",
+          "faction2": "Necrons",
+          "disposition1": "Take and Hold",
+          "disposition2": "Purge the Foe",
+          "enteredBy": "Miles",
+          "seq": 55
         }
       ],
       "tournamentEntries": [
