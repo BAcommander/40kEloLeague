@@ -656,6 +656,20 @@
           "disposition2": "Purge the Foe",
           "enteredBy": "Miles",
           "seq": 55
+        },
+        {
+          "id": "m-mv1eq7sj-yrjgh",
+          "date": "2026-10-07",
+          "p1": "p-colin",
+          "p2": "p-john",
+          "result": "Win",
+          "bp1": 93,
+          "bp2": 83,
+          "faction1": "Death Guard",
+          "faction2": "Blood Angels",
+          "disposition1": "Priority Assets",
+          "disposition2": "Priority Assets",
+          "seq": 56
         }
       ],
       "tournamentEntries": [
