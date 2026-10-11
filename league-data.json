@@ -670,6 +670,21 @@
           "disposition1": "Priority Assets",
           "disposition2": "Priority Assets",
           "seq": 56
+        },
+        {
+          "id": "m-mv4cvcc4-p2yup",
+          "date": "2026-10-11",
+          "p1": "p-miles",
+          "p2": "p-colin",
+          "result": "Win",
+          "bp1": 100,
+          "bp2": 43,
+          "faction1": "Adeptus Custodes",
+          "faction2": "Death Guard",
+          "disposition1": "Take and Hold",
+          "disposition2": "Priority Assets",
+          "enteredBy": "Miles",
+          "seq": 57
         }
       ],
       "tournamentEntries": [
