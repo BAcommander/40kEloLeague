@@ -700,6 +700,21 @@
           "disposition2": "Purge the Foe",
           "enteredBy": "Miles",
           "seq": 58
+        },
+        {
+          "id": "m-mv8p3v62-22ta4",
+          "date": "2026-10-14",
+          "p1": "p-miles",
+          "p2": "p-gav",
+          "result": "Win",
+          "bp1": 100,
+          "bp2": 69,
+          "faction1": "Adeptus Custodes",
+          "faction2": "Ultramarines",
+          "disposition1": "Take and Hold",
+          "disposition2": "Take and Hold",
+          "enteredBy": "Miles",
+          "seq": 59
         }
       ],
       "tournamentEntries": [
