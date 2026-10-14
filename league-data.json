@@ -685,6 +685,21 @@
           "disposition2": "Priority Assets",
           "enteredBy": "Miles",
           "seq": 57
+        },
+        {
+          "id": "m-mv7qtidf-8d7cu",
+          "date": "2026-10-13",
+          "p1": "p-andrew",
+          "p2": "p-colin",
+          "result": "Win",
+          "bp1": 78,
+          "bp2": 55,
+          "faction1": "World Eaters",
+          "faction2": "Death Guard",
+          "disposition1": "Purge the Foe",
+          "disposition2": "Purge the Foe",
+          "enteredBy": "Miles",
+          "seq": 58
         }
       ],
       "tournamentEntries": [
