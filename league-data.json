@@ -715,6 +715,21 @@
           "disposition2": "Take and Hold",
           "enteredBy": "Miles",
           "seq": 59
+        },
+        {
+          "id": "m-mv8qw1e4-vjwg4",
+          "date": "2026-10-15",
+          "p1": "p-john",
+          "p2": "p-brett",
+          "result": "Win",
+          "bp1": 88,
+          "bp2": 76,
+          "faction1": "Blood Angels",
+          "faction2": "Orks",
+          "disposition1": "Priority Assets",
+          "disposition2": "Priority Assets",
+          "enteredBy": "John",
+          "seq": 60
         }
       ],
       "tournamentEntries": [
