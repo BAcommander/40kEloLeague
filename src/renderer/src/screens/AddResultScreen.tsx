@@ -135,6 +135,7 @@ function PlayerSelect(props: {
             autoFocus
             placeholder="Player name"
             value={newName}
+            style={{ flex: 1, minWidth: 0 }}
             onChange={(e) => setNewName(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && newName.trim()) {
@@ -148,6 +149,7 @@ function PlayerSelect(props: {
           />
           <button
             className="btn small"
+            style={{ flexShrink: 0 }}
             onClick={() => {
               if (newName.trim()) {
                 const id = props.onAddPlayer(newName.trim())

@@ -128,6 +128,11 @@ in-memory.
   `lib.ts` `SERIES`; W/D/L uses the green/gray/red diverging trio. Follow the
   `dataviz` skill before adding/altering any chart.
 - Fonts: Bahnschrift (headings, ships with Win 11), Segoe UI (body) — nothing bundled.
+- Phone layout (≤768px, `useIsMobile()` in `hooks.ts` + the matching `@media` block at
+  the end of `theme.css`): the sidebar becomes a top header + bottom tab bar, the
+  league table shows Rank/Name/trend/ELO with tap-to-expand rows, forms go single
+  column with 16px inputs (no iOS zoom) and 44px targets. Desktop CSS above the media
+  query must stay untouched — the breakpoint is the only thing shared.
 - Player identity is by stable `id`; renames just edit `Player.name` and all history
   follows. Color-slot assignment on the ELO chart is per-entity and stable while selected.
 - Dispositions: optional free-text per player per game (all three log types), tracked

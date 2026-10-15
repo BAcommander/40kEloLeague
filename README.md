@@ -22,8 +22,8 @@ minute).
 
 ## Daily use
 
-1. Open the site → **Enter league code** (bottom left, one time per device) → pick your
-   name.
+1. Open the site → **Enter league code** (bottom of the sidebar on desktop, top-right on
+   a phone; one time per device) → pick your name.
 2. **Add Result** → players, result, battle points → **Save**. The table, ELOs and
    charts update instantly and a toast shows exactly how much each ELO moved.
 3. **Share the table**: League Table → **Copy image**, paste straight into WhatsApp.

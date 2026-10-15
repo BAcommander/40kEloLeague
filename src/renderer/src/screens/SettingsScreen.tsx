@@ -2,7 +2,8 @@ import { useState } from 'react'
 import type { ImportReport, LeagueData, Season } from '@shared/types'
 import { DEFAULT_MIN_RANKED_GAMES, DEFAULT_START_ELO, excelRound } from '@shared/engine'
 import { useApp } from '../App'
-import { downloadJson, importJsonFile, importXlsxFile } from '../remote'
+import { useIsMobile } from '../hooks'
+import { usingLocalBackend, downloadJson, importJsonFile, importXlsxFile } from '../remote'
 import { fmtDate, todayIso, uid, updateSeason } from '../lib'
 
 function ReportView({ report }: { report: ImportReport }): JSX.Element {
@@ -54,7 +55,8 @@ function ReportView({ report }: { report: ImportReport }): JSX.Element {
 }
 
 export default function SettingsScreen(): JSX.Element {
-  const { data, season, comp, mutate, replaceData, toast, role } = useApp()
+  const { data, season, comp, mutate, replaceData, toast, role, session, signOut, openUnlock } = useApp()
+  const isMobile = useIsMobile()
   const [leagueName, setLeagueName] = useState(data.settings.leagueName)
   const [showReport, setShowReport] = useState(false)
   const [newSeasonOpen, setNewSeasonOpen] = useState(false)
@@ -155,6 +157,35 @@ export default function SettingsScreen(): JSX.Element {
       </div>
 
       <div className="settings-list">
+        {isMobile && (
+          /* On desktop this lives in the sidebar footer; phones have no sidebar. */
+          <div className="card">
+            <h2>{season.name}</h2>
+            <p className="hint">
+              {season.players.length} players · {season.matches.length + season.guestGames.length} games ·{' '}
+              {new Set(season.tournamentEntries.map((t) => t.tournament)).size} tournaments
+            </p>
+            <div className="setting-item">
+              <div className="grow">
+                <div className="name">{session ? session.enteredBy || 'Signed in' : 'Viewing only'}</div>
+                <div className="desc">
+                  {session
+                    ? `${session.role === 'admin' ? 'Admin' : 'Member'} on this device${usingLocalBackend ? ' · local dev' : ''}`
+                    : 'Enter the league code to add results'}
+                </div>
+              </div>
+              {session ? (
+                <button className="btn small" onClick={signOut}>
+                  Sign out
+                </button>
+              ) : (
+                <button className="btn small primary" onClick={openUnlock}>
+                  Enter league code
+                </button>
+              )}
+            </div>
+          </div>
+        )}
         {role === 'admin' && (
           <>
         <div className="card">
@@ -265,7 +296,7 @@ export default function SettingsScreen(): JSX.Element {
             <h2>League settings</h2>
             <p className="hint" style={{ marginBottom: 0 }}>
               Backups, seasons and league options are managed by the admins
-              {role === 'viewer' ? ' — enter the league code (bottom left) to add results' : ''}.
+              {role === 'viewer' ? ' — enter the league code to add results' : ''}.
             </p>
           </div>
         )}

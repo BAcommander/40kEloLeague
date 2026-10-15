@@ -4,6 +4,7 @@ import type { AppendRequest, Role } from '@shared/protocol'
 import { computeSeason } from '@shared/engine'
 import { ApiError, appendEntry, getLeague, putLeague, usingLocalBackend } from './remote'
 import { activeSeason } from './lib'
+import { useIsMobile } from './hooks'
 import UnlockModal from './components/UnlockModal'
 import LeagueTableScreen from './screens/LeagueTableScreen'
 import AddResultScreen from './screens/AddResultScreen'
@@ -34,6 +35,11 @@ interface AppCtx {
   comp: SeasonComputation
   role: UiRole
   enteredBy: string
+  session: Session | null
+  /** Forget the stored league code (sidebar on desktop, Settings → Account on mobile). */
+  signOut: () => void
+  /** Open the enter-league-code dialog. */
+  openUnlock: () => void
   /** Member+ write: append one result/player; resolves to the fresh data, or null on failure (already toasted). */
   append: (req: Omit<AppendRequest, 'enteredBy'>) => Promise<LeagueData | null>
   /** Admin write: full-document save (edits, deletes, settings). No-op unless admin. */
@@ -66,10 +72,11 @@ function loadSession(): Session | null {
   }
 }
 
-const NAV: { id: ScreenId; label: string; icon: JSX.Element }[] = [
+const NAV: { id: ScreenId; label: string; short: string; icon: JSX.Element }[] = [
   {
     id: 'table',
     label: 'League Table',
+    short: 'Table',
     icon: (
       <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
         <path d="M2 1h12v3H2zM2 6h12v1.5H2zm0 3.5h12V11H2zM2 13h12v1.5H2z" />
@@ -79,6 +86,7 @@ const NAV: { id: ScreenId; label: string; icon: JSX.Element }[] = [
   {
     id: 'add',
     label: 'Add Result',
+    short: 'Add',
     icon: (
       <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
         <path d="M7 2h2v5h5v2H9v5H7V9H2V7h5z" />
@@ -88,6 +96,7 @@ const NAV: { id: ScreenId; label: string; icon: JSX.Element }[] = [
   {
     id: 'history',
     label: 'History',
+    short: 'History',
     icon: (
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6">
         <circle cx="8" cy="8" r="6" />
@@ -98,6 +107,7 @@ const NAV: { id: ScreenId; label: string; icon: JSX.Element }[] = [
   {
     id: 'charts',
     label: 'Charts',
+    short: 'Charts',
     icon: (
       <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
         <path d="M2 13h2.5V6H2zM6.75 13h2.5V2h-2.5zM11.5 13H14V8h-2.5z" />
@@ -107,6 +117,7 @@ const NAV: { id: ScreenId; label: string; icon: JSX.Element }[] = [
   {
     id: 'players',
     label: 'Players',
+    short: 'Players',
     icon: (
       <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
         <circle cx="8" cy="5" r="3" />
@@ -117,6 +128,7 @@ const NAV: { id: ScreenId; label: string; icon: JSX.Element }[] = [
   {
     id: 'settings',
     label: 'Settings',
+    short: 'Settings',
     icon: (
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6">
         <circle cx="8" cy="8" r="2.4" />
@@ -180,6 +192,9 @@ export default function App(): JSX.Element {
     localStorage.setItem(SESSION_KEY, JSON.stringify(s))
     setSession(s)
   }, [])
+
+  const openUnlock = useCallback(() => setUnlockOpen(true), [])
+  const isMobile = useIsMobile()
 
   const clearUndo = useCallback(() => {
     undoStack.current = []
@@ -353,9 +368,25 @@ export default function App(): JSX.Element {
   const ctx = useMemo<AppCtx | null>(
     () =>
       data && season && comp
-        ? { data, season, comp, role, enteredBy, append, mutate, replaceData, toast, undo, canUndo, go: setScreen }
+        ? {
+            data,
+            season,
+            comp,
+            role,
+            enteredBy,
+            session,
+            signOut: clearSession,
+            openUnlock,
+            append,
+            mutate,
+            replaceData,
+            toast,
+            undo,
+            canUndo,
+            go: setScreen
+          }
         : null,
-    [data, season, comp, role, enteredBy, append, mutate, replaceData, toast, undo, canUndo]
+    [data, season, comp, role, enteredBy, session, clearSession, openUnlock, append, mutate, replaceData, toast, undo, canUndo]
   )
 
   if (loadError) {
@@ -378,6 +409,83 @@ export default function App(): JSX.Element {
   // A viewer can land on 'add' via ?screen=add or by signing out while on it —
   // fall back to the table rather than an empty pane.
   const shown: ScreenId = screen === 'add' && role === 'viewer' ? 'table' : screen
+
+  const unlockModal = unlockOpen && (
+    <UnlockModal
+      onClose={() => setUnlockOpen(false)}
+      onUnlocked={(s) => {
+        saveSession(s)
+        setUnlockOpen(false)
+        toast(s.role === 'admin' ? 'Signed in as admin' : 'Welcome — you can now add results')
+      }}
+    />
+  )
+  const toastStack = (
+    <div className="toasts">
+      {toasts.map((t) => (
+        <div key={t.id} className={`toast ${t.kind}`}>
+          {t.msg}
+        </div>
+      ))}
+    </div>
+  )
+  const page = (
+    <main className="main">
+      {shown === 'table' && <LeagueTableScreen />}
+      {shown === 'add' && <AddResultScreen />}
+      {shown === 'history' && <HistoryScreen />}
+      {shown === 'charts' && <ChartsScreen />}
+      {shown === 'players' && <PlayersScreen />}
+      {shown === 'settings' && <SettingsScreen />}
+    </main>
+  )
+
+  // Phone layout: slim top header + bottom tab bar instead of the sidebar. The
+  // sidebar footer's bits (season summary, who's signed in, sign out) live on the
+  // Settings screen there, reached from the header gear.
+  if (isMobile) {
+    const tabs = nav.filter((n) => n.id !== 'settings')
+    return (
+      <Ctx.Provider value={ctx}>
+        <div className="app mobile">
+          <header className="mobile-header">
+            <div className="brand">PKH LEAGUE</div>
+            <div className="actions">
+              {!session && (
+                <button className="btn small" onClick={() => setUnlockOpen(true)}>
+                  Enter code
+                </button>
+              )}
+              <button
+                className={`icon-btn ${shown === 'settings' ? 'active' : ''}`}
+                aria-label="Settings"
+                title="Settings"
+                onClick={() => setScreen('settings')}
+              >
+                {NAV[NAV.length - 1].icon}
+              </button>
+            </div>
+          </header>
+          {page}
+          <nav className="tabbar" aria-label="Main">
+            {tabs.map((n) => (
+              <button
+                key={n.id}
+                className={`tab ${shown === n.id ? 'active' : ''}`}
+                onClick={() => setScreen(n.id)}
+                aria-current={shown === n.id ? 'page' : undefined}
+              >
+                {n.icon}
+                <span>{n.short}</span>
+              </button>
+            ))}
+          </nav>
+          {toastStack}
+          {unlockModal}
+        </div>
+      </Ctx.Provider>
+    )
+  }
 
   return (
     <Ctx.Provider value={ctx}>
@@ -423,31 +531,9 @@ export default function App(): JSX.Element {
             </div>
           </div>
         </nav>
-        <main className="main">
-          {shown === 'table' && <LeagueTableScreen />}
-          {shown === 'add' && <AddResultScreen />}
-          {shown === 'history' && <HistoryScreen />}
-          {shown === 'charts' && <ChartsScreen />}
-          {shown === 'players' && <PlayersScreen />}
-          {shown === 'settings' && <SettingsScreen />}
-        </main>
-        <div className="toasts">
-          {toasts.map((t) => (
-            <div key={t.id} className={`toast ${t.kind}`}>
-              {t.msg}
-            </div>
-          ))}
-        </div>
-        {unlockOpen && (
-          <UnlockModal
-            onClose={() => setUnlockOpen(false)}
-            onUnlocked={(s) => {
-              saveSession(s)
-              setUnlockOpen(false)
-              toast(s.role === 'admin' ? 'Signed in as admin' : 'Welcome — you can now add results')
-            }}
-          />
-        )}
+        {page}
+        {toastStack}
+        {unlockModal}
       </div>
     </Ctx.Provider>
   )

@@ -46,6 +46,7 @@ export default function HistoryScreen(): JSX.Element {
             Undo last change
           </button>
         )}
+        <div className="head-actions">
         <select value={filterPlayer} onChange={(e) => setFilterPlayer(e.target.value)}>
           <option value="">All players</option>
           {[...season.players]
@@ -62,14 +63,15 @@ export default function HistoryScreen(): JSX.Element {
           <option>Tournament</option>
           <option>Guest</option>
         </select>
+        </div>
       </div>
 
       <div className="card" style={{ padding: '4px 0' }}>
         {rows.map((e) => (
           <div className="history-row" key={`${e.type}-${e.sourceId}`}>
-            <span style={{ color: 'var(--ink-3)', fontSize: 12.5 }}>{fmtDate(e.date)}</span>
-            <span className={`pill ${e.type.toLowerCase()}`}>{e.type}</span>
-            <span>
+            <span className="when" style={{ color: 'var(--ink-3)', fontSize: 12.5 }}>{fmtDate(e.date)}</span>
+            <span className={`pill kind ${e.type.toLowerCase()}`}>{e.type}</span>
+            <span className="what">
               <span className="who">{e.playerName}</span>
               {e.result && (
                 <span className={`pill ${e.result.toLowerCase()}`} style={{ margin: '0 8px' }}>
@@ -85,14 +87,14 @@ export default function HistoryScreen(): JSX.Element {
               {e.faction && <span style={{ color: 'var(--ink-3)', fontSize: 12 }}> · {e.faction}</span>}
               {e.disposition && <span style={{ color: 'var(--ink-3)', fontSize: 12 }}> · {e.disposition}</span>}
             </span>
-            <span className="elo-shift">
+            <span className="elo-shift range">
               {e.eloBefore} → {e.eloAfter}
             </span>
-            <span className={`elo-shift ${e.delta > 0 ? 'delta-pos' : e.delta < 0 ? 'delta-neg' : 'delta-zero'}`}>
+            <span className={`elo-shift delta ${e.delta > 0 ? 'delta-pos' : e.delta < 0 ? 'delta-neg' : 'delta-zero'}`}>
               {e.delta > 0 ? '+' : ''}
               {e.delta}
             </span>
-            <span style={{ display: 'flex', gap: 6 }}>
+            <span className="row-actions" style={{ display: 'flex', gap: 6 }}>
               {role === 'admin' && (
                 <>
                   <button className="btn small" onClick={() => setEditing({ type: e.type, id: e.sourceId })}>

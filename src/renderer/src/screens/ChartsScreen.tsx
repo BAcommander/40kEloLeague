@@ -14,6 +14,7 @@ import {
 } from 'recharts'
 import { toPng } from 'html-to-image'
 import { useApp } from '../App'
+import { useIsMobile } from '../hooks'
 import { downloadDataUrl } from '../remote'
 import { fmtDate, SERIES, WDL } from '../lib'
 
@@ -45,9 +46,9 @@ function ChartCard(props: {
     toast('Chart downloaded')
   }
   return (
-    <div className="card" ref={ref}>
-      <div style={{ display: 'flex', alignItems: 'baseline' }}>
-        <div style={{ flex: 1 }}>
+    <div className="card chart-card" ref={ref}>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
           <h2>{props.title}</h2>
           <p className="hint">{props.hint}</p>
         </div>
@@ -130,7 +131,8 @@ export default function ChartsScreen(): JSX.Element {
           name: f.faction,
           winPct: Math.round(f.winPct * 100),
           games: f.games,
-          label: `${Math.round(f.winPct * 100)}% · ${f.games} game${f.games === 1 ? '' : 's'}`
+          label: `${Math.round(f.winPct * 100)}% · ${f.games} game${f.games === 1 ? '' : 's'}`,
+          shortLabel: `${Math.round(f.winPct * 100)}% · ${f.games}g`
         }))
         .sort((a, b) => b.winPct - a.winPct),
     [comp.factionStats]
@@ -182,6 +184,15 @@ export default function ChartsScreen(): JSX.Element {
 
   const barSize = Math.min(24, Math.max(14, 300 / Math.max(1, activePlayers.length)))
 
+  // Phone widths: fewer x ticks, narrower category axes, tighter margins so the
+  // plot area keeps most of the ~340px available.
+  const isMobile = useIsMobile()
+  const nameAxisWidth = isMobile ? 64 : 80
+  const longNameAxisWidth = isMobile ? 92 : 130
+  const labelMargin = isMobile ? 44 : 60
+  const tickFont = isMobile ? 11 : 11.5
+  const catFont = isMobile ? 11.5 : 12.5
+
   return (
     <div>
       <div className="screen-head">
@@ -210,16 +221,16 @@ export default function ChartsScreen(): JSX.Element {
               )
             })}
           </div>
-          <ResponsiveContainer width="100%" height={340}>
-            <LineChart data={eloData} margin={{ top: 8, right: 24, bottom: 4, left: 0 }}>
+          <ResponsiveContainer width="100%" height={isMobile ? 280 : 340}>
+            <LineChart data={eloData} margin={{ top: 8, right: isMobile ? 12 : 24, bottom: 4, left: 0 }}>
               <CartesianGrid stroke={GRID} strokeWidth={1} vertical={false} />
               <XAxis
                 dataKey="x"
                 type="number"
                 domain={[0, comp.timeline.length]}
-                tickCount={8}
+                tickCount={isMobile ? 4 : 8}
                 stroke={GRID}
-                tick={{ fill: INK3, fontSize: 11.5 }}
+                tick={{ fill: INK3, fontSize: tickFont }}
                 tickFormatter={(x: number) =>
                   x === 0 ? 'Start' : comp.timeline[x - 1] ? fmtDate(comp.timeline[x - 1].date).slice(0, 6) : ''
                 }
@@ -227,8 +238,8 @@ export default function ChartsScreen(): JSX.Element {
               <YAxis
                 domain={['dataMin - 15', 'dataMax + 15']}
                 stroke={GRID}
-                tick={{ fill: INK3, fontSize: 11.5 }}
-                width={44}
+                tick={{ fill: INK3, fontSize: tickFont }}
+                width={isMobile ? 38 : 44}
               />
               <Tooltip
                 contentStyle={tooltipStyle}
@@ -268,21 +279,26 @@ export default function ChartsScreen(): JSX.Element {
           exportName="faction-performance"
         >
           <ResponsiveContainer width="100%" height={Math.max(200, factionData.length * 34 + 40)}>
-            <BarChart data={factionData} layout="vertical" margin={{ top: 4, right: 60, bottom: 4, left: 30 }}>
+            <BarChart
+              data={factionData}
+              layout="vertical"
+              margin={{ top: 4, right: isMobile ? 56 : 60, bottom: 4, left: isMobile ? 0 : 30 }}
+            >
               <CartesianGrid stroke={GRID} strokeWidth={1} horizontal={false} />
               <XAxis
                 type="number"
                 domain={[0, 100]}
                 stroke={GRID}
-                tick={{ fill: INK3, fontSize: 11.5 }}
+                tick={{ fill: INK3, fontSize: tickFont }}
+                tickCount={isMobile ? 3 : undefined}
                 tickFormatter={(v) => `${v}%`}
               />
               <YAxis
                 type="category"
                 dataKey="name"
-                width={130}
+                width={longNameAxisWidth}
                 stroke={GRID}
-                tick={{ fill: INK2, fontSize: 12.5 }}
+                tick={{ fill: INK2, fontSize: catFont }}
               />
               <Tooltip
                 contentStyle={tooltipStyle}
@@ -291,9 +307,9 @@ export default function ChartsScreen(): JSX.Element {
               />
               <Bar dataKey="winPct" fill="#3987e5" barSize={18} radius={[0, 4, 4, 0]} isAnimationActive={false}>
                 <LabelList
-                  dataKey="label"
+                  dataKey={isMobile ? 'shortLabel' : 'label'}
                   position="right"
-                  style={{ fill: INK2, fontSize: 12, fontVariantNumeric: 'tabular-nums' }}
+                  style={{ fill: INK2, fontSize: isMobile ? 11 : 12, fontVariantNumeric: 'tabular-nums' }}
                 />
               </Bar>
             </BarChart>
@@ -305,7 +321,7 @@ export default function ChartsScreen(): JSX.Element {
           hint="Row player's record against column player (league singles matches). Blue = ahead, red = behind."
           exportName="head-to-head"
         >
-          <div style={{ overflowX: 'auto' }}>
+          <div className="scroll-x">
             <table className="h2h">
               <thead>
                 <tr>
@@ -355,10 +371,10 @@ export default function ChartsScreen(): JSX.Element {
           exportName="results-breakdown"
         >
           <ResponsiveContainer width="100%" height={Math.max(200, wdlData.length * 34 + 40)}>
-            <BarChart data={wdlData} layout="vertical" margin={{ top: 4, right: 40, bottom: 4, left: 10 }}>
+            <BarChart data={wdlData} layout="vertical" margin={{ top: 4, right: isMobile ? 16 : 40, bottom: 4, left: isMobile ? 0 : 10 }}>
               <CartesianGrid stroke={GRID} strokeWidth={1} horizontal={false} />
-              <XAxis type="number" allowDecimals={false} stroke={GRID} tick={{ fill: INK3, fontSize: 11.5 }} />
-              <YAxis type="category" dataKey="name" width={80} stroke={GRID} tick={{ fill: INK2, fontSize: 12.5 }} />
+              <XAxis type="number" allowDecimals={false} stroke={GRID} tick={{ fill: INK3, fontSize: tickFont }} />
+              <YAxis type="category" dataKey="name" width={nameAxisWidth} stroke={GRID} tick={{ fill: INK2, fontSize: catFont }} />
               <Tooltip contentStyle={tooltipStyle} cursor={{ fill: 'rgba(255,255,255,0.04)' }} />
               <Bar dataKey="Wins" stackId="a" fill={WDL.win} barSize={barSize} stroke={SURFACE} strokeWidth={1} isAnimationActive={false} />
               <Bar dataKey="Draws" stackId="a" fill={WDL.draw} barSize={barSize} stroke={SURFACE} strokeWidth={1} isAnimationActive={false} />
@@ -385,10 +401,10 @@ export default function ChartsScreen(): JSX.Element {
           ) : (
             <>
               <ResponsiveContainer width="100%" height={Math.max(200, dispositionData.length * 34 + 40)}>
-                <BarChart data={dispositionData} layout="vertical" margin={{ top: 4, right: 40, bottom: 4, left: 30 }}>
+                <BarChart data={dispositionData} layout="vertical" margin={{ top: 4, right: isMobile ? 16 : 40, bottom: 4, left: isMobile ? 0 : 30 }}>
                   <CartesianGrid stroke={GRID} strokeWidth={1} horizontal={false} />
-                  <XAxis type="number" allowDecimals={false} stroke={GRID} tick={{ fill: INK3, fontSize: 11.5 }} />
-                  <YAxis type="category" dataKey="name" width={130} stroke={GRID} tick={{ fill: INK2, fontSize: 12.5 }} />
+                  <XAxis type="number" allowDecimals={false} stroke={GRID} tick={{ fill: INK3, fontSize: tickFont }} />
+                  <YAxis type="category" dataKey="name" width={longNameAxisWidth} stroke={GRID} tick={{ fill: INK2, fontSize: catFont }} />
                   <Tooltip
                     contentStyle={tooltipStyle}
                     cursor={{ fill: 'rgba(255,255,255,0.04)' }}
@@ -417,10 +433,10 @@ export default function ChartsScreen(): JSX.Element {
           exportName="avg-battle-points"
         >
           <ResponsiveContainer width="100%" height={Math.max(200, bpData.length * 34 + 40)}>
-            <BarChart data={bpData} layout="vertical" margin={{ top: 4, right: 60, bottom: 4, left: 10 }}>
+            <BarChart data={bpData} layout="vertical" margin={{ top: 4, right: labelMargin, bottom: 4, left: isMobile ? 0 : 10 }}>
               <CartesianGrid stroke={GRID} strokeWidth={1} horizontal={false} />
-              <XAxis type="number" stroke={GRID} tick={{ fill: INK3, fontSize: 11.5 }} />
-              <YAxis type="category" dataKey="name" width={80} stroke={GRID} tick={{ fill: INK2, fontSize: 12.5 }} />
+              <XAxis type="number" stroke={GRID} tick={{ fill: INK3, fontSize: tickFont }} />
+              <YAxis type="category" dataKey="name" width={nameAxisWidth} stroke={GRID} tick={{ fill: INK2, fontSize: catFont }} />
               <Tooltip
                 contentStyle={tooltipStyle}
                 formatter={(v: number) => [`${v} avg BP`, '']}

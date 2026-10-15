@@ -194,14 +194,14 @@ export default function PlayersScreen(): JSX.Element {
                     ? 'Win'
                     : e.result
               return (
-                <div className="history-row" key={`${e.type}-${e.sourceId}`} style={{ gridTemplateColumns: '92px 86px 1fr 96px' }}>
-                  <span style={{ color: 'var(--ink-3)', fontSize: 12.5 }}>{fmtDate(e.date)}</span>
-                  <span className={`pill ${e.type.toLowerCase()}`}>{e.type}</span>
-                  <span>
+                <div className="history-row compact" key={`${e.type}-${e.sourceId}`}>
+                  <span className="when" style={{ color: 'var(--ink-3)', fontSize: 12.5 }}>{fmtDate(e.date)}</span>
+                  <span className={`pill kind ${e.type.toLowerCase()}`}>{e.type}</span>
+                  <span className="what">
                     {res && <span className={`pill ${String(res).toLowerCase()}`} style={{ marginRight: 8 }}>{res}</span>}
                     <span style={{ color: 'var(--ink-2)' }}>vs {opp}</span>
                   </span>
-                  <span className={`elo-shift ${delta > 0 ? 'delta-pos' : delta < 0 ? 'delta-neg' : 'delta-zero'}`}>
+                  <span className={`elo-shift delta ${delta > 0 ? 'delta-pos' : delta < 0 ? 'delta-neg' : 'delta-zero'}`}>
                     {delta > 0 ? '+' : ''}
                     {delta} → {after}
                   </span>

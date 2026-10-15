@@ -210,6 +210,13 @@ input[type='date'] {
   flex: 1;
 }
 
+/* Grouped header controls — same 14px rhythm as the head itself on desktop. */
+.screen-head .head-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
 /* ---------- cards & panels ---------- */
 
 .card {
@@ -306,6 +313,14 @@ table.league th {
 
 table.league th:nth-child(-n + 3) {
   text-align: left;
+}
+
+table.league th.col-rank {
+  width: 70px;
+}
+
+table.league th.col-move {
+  width: 60px;
 }
 
 table.league td {
@@ -520,6 +535,7 @@ table.league tr:hover td {
   border-radius: 12px;
   padding: 22px;
   width: min(680px, 92vw);
+  max-width: calc(100vw - 24px); /* caps the inline fixed widths (400–480px) on phones */
   max-height: 88vh;
   overflow-y: auto;
   box-shadow: 0 18px 60px rgba(0, 0, 0, 0.6);
@@ -547,6 +563,11 @@ table.league tr:hover td {
   background: rgba(255, 255, 255, 0.025);
 }
 
+/* Player detail modal: no before→after column, no action buttons. */
+.history-row.compact {
+  grid-template-columns: 92px 86px 1fr 96px;
+}
+
 .history-row .who {
   font-weight: 600;
 }
@@ -564,8 +585,19 @@ table.league tr:hover td {
 
 .chart-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  /* minmax(0, …) so a Recharts ResponsiveContainer can never widen its own column */
+  grid-template-columns: minmax(0, 1fr);
   gap: 18px;
+}
+
+.chart-grid > * {
+  min-width: 0;
+}
+
+.scroll-x {
+  overflow-x: auto;
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
 }
 
 .chip-row {
@@ -730,4 +762,435 @@ table.diffs th {
   font-size: 11.5px;
   text-transform: uppercase;
   letter-spacing: 0.07em;
+}
+
+/* =====================================================================
+   Phone layout (≤768px) — keep the breakpoint in sync with MOBILE_QUERY
+   in hooks.ts. Nothing here applies above 768px, so desktop is untouched.
+   ===================================================================== */
+
+/* ---- shell: header / scrolling main / tab bar ---- */
+
+.app.mobile {
+  flex-direction: column;
+  width: 100%;
+  overflow: hidden;
+}
+
+.mobile-header {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: calc(52px + env(safe-area-inset-top));
+  padding: calc(6px + env(safe-area-inset-top)) 12px 6px 16px;
+  background: linear-gradient(180deg, #1b1511 0%, #14100c 100%);
+  border-bottom: 1px solid var(--border);
+}
+
+.mobile-header .brand {
+  font-family: var(--font-display);
+  font-size: 19px;
+  letter-spacing: 0.06em;
+  color: var(--gold);
+  white-space: nowrap;
+}
+
+.mobile-header .actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  color: var(--ink-2);
+}
+
+.icon-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.icon-btn.active {
+  background: var(--gold-soft);
+  color: var(--gold);
+}
+
+.app.mobile .main {
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  padding: 14px 16px 24px;
+}
+
+.tabbar {
+  flex-shrink: 0;
+  display: flex;
+  background: #1b1511;
+  border-top: 1px solid var(--border);
+  padding: 6px 4px calc(6px + env(safe-area-inset-bottom));
+}
+
+.tabbar .tab {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 4px 2px;
+  border-radius: 8px;
+  color: var(--ink-3);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.tabbar .tab svg {
+  width: 20px;
+  height: 20px;
+}
+
+.tabbar .tab span {
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tabbar .tab.active {
+  color: var(--gold);
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    display: none;
+  }
+
+  /* ---- page headers: title, then one-line subtitle, then controls ---- */
+
+  .screen-head {
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2px 10px;
+    margin-bottom: 14px;
+  }
+
+  .screen-head h1 {
+    flex: 1 1 100%;
+    font-size: 22px;
+  }
+
+  .screen-head .sub {
+    flex: 1 1 100%;
+    min-width: 0;
+    font-size: 12.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .screen-head .spacer {
+    display: none;
+  }
+
+  .screen-head > .btn,
+  .screen-head .head-actions {
+    flex: 1 1 100%;
+    margin-top: 10px;
+  }
+
+  .screen-head > .btn {
+    justify-content: center;
+  }
+
+  .screen-head .head-actions {
+    gap: 8px;
+  }
+
+  .screen-head .head-actions > * {
+    flex: 1 1 0;
+    min-width: 0;
+    justify-content: center;
+  }
+
+  /* ---- cards ---- */
+
+  .card {
+    padding: 14px;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  /* ---- touch targets & iOS-safe inputs (16px stops the auto-zoom) ---- */
+
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+    min-height: 44px;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  input[type='date'] {
+    display: block;
+    -webkit-appearance: none;
+    appearance: none;
+    line-height: 1.3;
+  }
+
+  .btn {
+    min-height: 44px;
+  }
+
+  .btn.small {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+
+  .chip {
+    min-height: 44px;
+    padding: 6px 14px;
+    font-size: 13px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  /* the Save button under a form */
+  .form-grid + div > .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .seg {
+    display: flex;
+    width: 100%;
+  }
+
+  .seg button {
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 44px;
+    padding: 8px 4px;
+    font-size: 14px;
+    white-space: nowrap;
+  }
+
+  .tabs {
+    width: 100%;
+    gap: 4px;
+    margin-bottom: 14px;
+  }
+
+  .tabs button {
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 44px;
+    padding: 8px 4px;
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* ---- league table: rank · name · trend · ELO, tap to unfold the rest ---- */
+
+  table.league th,
+  table.league td {
+    padding: 12px 8px;
+  }
+
+  table.league th:first-child,
+  table.league td:first-child {
+    padding-left: 10px;
+  }
+
+  table.league th:nth-child(4),
+  table.league td:nth-child(4) {
+    padding-right: 12px;
+  }
+
+  table.league .col-more {
+    display: none;
+  }
+
+  table.league th.col-rank {
+    width: 58px;
+  }
+
+  table.league th.col-move {
+    width: 46px;
+  }
+
+  table.league td.player-name {
+    overflow-wrap: anywhere;
+  }
+
+  .movement {
+    width: auto;
+  }
+
+  table.league tr.tappable td {
+    cursor: pointer;
+  }
+
+  table.league tr.open td {
+    background: rgba(255, 255, 255, 0.03);
+    border-bottom-color: transparent;
+  }
+
+  table.league tr.detail-row td {
+    padding: 2px 12px 14px;
+    background: rgba(255, 255, 255, 0.03);
+    text-align: left;
+  }
+
+  .detail-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px 8px;
+  }
+
+  .detail-grid .stat .v {
+    font-size: 15px;
+  }
+
+  .detail-grid .stat .k {
+    font-size: 10px;
+  }
+
+  /* ---- history: three short rows instead of six columns ---- */
+
+  .history-row {
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas:
+      'when kind delta'
+      'what what what'
+      'range range actions';
+    gap: 6px 8px;
+    padding: 10px 12px;
+  }
+
+  .history-row.compact {
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas:
+      'when kind delta'
+      'what what what';
+  }
+
+  .history-row .when {
+    grid-area: when;
+  }
+
+  .history-row .kind {
+    grid-area: kind;
+    justify-self: start;
+  }
+
+  .history-row .delta {
+    grid-area: delta;
+  }
+
+  .history-row .what {
+    grid-area: what;
+    line-height: 1.8;
+  }
+
+  .history-row .range {
+    grid-area: range;
+    text-align: left;
+    color: var(--ink-3);
+    font-size: 12.5px;
+  }
+
+  .history-row .row-actions {
+    grid-area: actions;
+    justify-self: end;
+  }
+
+  /* ---- players ---- */
+
+  .player-cards {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .stat-row {
+    flex-wrap: wrap;
+    gap: 12px 18px;
+  }
+
+  /* ---- settings ---- */
+
+  .setting-item {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .setting-item .grow {
+    flex: 1 1 100%;
+  }
+
+  .setting-item input {
+    flex: 1 1 120px;
+  }
+
+  /* ---- charts ---- */
+
+  .chart-card {
+    overflow: hidden;
+  }
+
+  .legend-row {
+    gap: 10px 14px;
+  }
+
+  .h2h td {
+    min-width: 54px;
+    padding: 7px 4px;
+  }
+
+  /* ---- modals: pinned to the top so the keyboard never covers them ---- */
+
+  .modal-backdrop {
+    align-items: flex-start;
+    padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
+    overflow-y: auto;
+  }
+
+  .modal {
+    width: 100%;
+    max-height: none;
+    padding: 18px 16px;
+  }
+
+  /* ---- toasts: above the tab bar, full width ---- */
+
+  .toasts {
+    left: 12px;
+    right: 12px;
+    bottom: calc(78px + env(safe-area-inset-bottom));
+  }
+
+  .toast {
+    min-width: 0;
+    max-width: none;
+  }
 }
