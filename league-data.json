@@ -730,6 +730,21 @@
           "disposition2": "Priority Assets",
           "enteredBy": "John",
           "seq": 60
+        },
+        {
+          "id": "m-mvhw07ui-rrx22",
+          "date": "2026-10-20",
+          "p1": "p-andrew",
+          "p2": "p-colin",
+          "result": "Loss",
+          "bp1": 48,
+          "bp2": 88,
+          "faction1": "Chaos Daemons",
+          "faction2": "Death Guard",
+          "disposition1": "Purge the Foe",
+          "disposition2": "Purge the Foe",
+          "enteredBy": "Miles",
+          "seq": 61
         }
       ],
       "tournamentEntries": [
