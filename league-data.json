@@ -760,6 +760,20 @@
           "disposition2": "Priority Assets",
           "enteredBy": "Miles",
           "seq": 62
+        },
+        {
+          "id": "m-mvsm2gol-tr5vr",
+          "date": "2026-10-28",
+          "p1": "p-miles",
+          "p2": "p-andrew",
+          "result": "Win",
+          "bp1": 97,
+          "bp2": 42,
+          "faction1": "Adeptus Custodes",
+          "faction2": "Chaos Daemons",
+          "disposition1": "Take and Hold",
+          "disposition2": "Purge the Foe",
+          "seq": 63
         }
       ],
       "tournamentEntries": [
