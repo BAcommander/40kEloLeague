@@ -910,6 +910,22 @@
           "disposition": "Priority Assets",
           "enteredBy": "Miles",
           "seq": 54
+        },
+        {
+          "id": "t-mvwtrteu-0nlho",
+          "date": "2026-10-31",
+          "tournament": "The Kelpie Cup #9",
+          "player": "p-gav",
+          "rounds": 3,
+          "wins": 3,
+          "draws": 0,
+          "losses": 0,
+          "vp": 282,
+          "sos": 0.75,
+          "faction": "Ultramarines",
+          "disposition": "Take and Hold",
+          "enteredBy": "Miles",
+          "seq": 64
         }
       ],
       "guestGames": [
