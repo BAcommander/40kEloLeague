@@ -941,6 +941,22 @@
           "disposition": "Take and Hold",
           "enteredBy": "Miles",
           "seq": 64
+        },
+        {
+          "id": "t-mw945s7d-v3obb",
+          "date": "2026-11-07",
+          "tournament": "Brewhammer GT10",
+          "player": "p-allan",
+          "rounds": 3,
+          "wins": 2,
+          "draws": 0,
+          "losses": 1,
+          "vp": 218,
+          "sos": 1,
+          "faction": "Death Guard",
+          "disposition": "Take and Hold",
+          "enteredBy": "Allan",
+          "seq": 66
         }
       ],
       "guestGames": [
