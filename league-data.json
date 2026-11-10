@@ -789,6 +789,21 @@
           "disposition2": "Purge the Foe",
           "enteredBy": "Miles",
           "seq": 65
+        },
+        {
+          "id": "m-mwb9v3d1-ps4t2",
+          "date": "2026-11-10",
+          "p1": "p-andrew",
+          "p2": "p-kev",
+          "result": "Win",
+          "bp1": 100,
+          "bp2": 34,
+          "faction1": "Chaos Daemons",
+          "faction2": "Aeldari",
+          "disposition1": "Purge the Foe",
+          "disposition2": "Take and Hold",
+          "enteredBy": "Miles",
+          "seq": 67
         }
       ],
       "tournamentEntries": [
