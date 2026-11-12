@@ -804,6 +804,21 @@
           "disposition2": "Take and Hold",
           "enteredBy": "Miles",
           "seq": 67
+        },
+        {
+          "id": "m-mwcsphhm-xlp6x",
+          "date": "2026-11-12",
+          "p1": "p-john",
+          "p2": "p-andrew",
+          "result": "Win",
+          "bp1": 89,
+          "bp2": 87,
+          "faction1": "Blood Angels",
+          "faction2": "Chaos Daemons",
+          "disposition1": "Purge the Foe",
+          "disposition2": "Purge the Foe",
+          "enteredBy": "John",
+          "seq": 68
         }
       ],
       "tournamentEntries": [
