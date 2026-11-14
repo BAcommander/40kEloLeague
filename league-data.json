@@ -1017,6 +1017,21 @@
           "faction": "Chaos Daemons",
           "disposition": "Purge the Foe",
           "seq": 70
+        },
+        {
+          "id": "t-mwgvtit9-i5lxv",
+          "date": "2026-11-14",
+          "tournament": "Speyhammer RTT Nov",
+          "player": "p-miles",
+          "rounds": 3,
+          "wins": 2,
+          "draws": 0,
+          "losses": 1,
+          "vp": 225,
+          "sos": 0.55,
+          "faction": "Adeptus Custodes",
+          "disposition": "Take and Hold",
+          "seq": 71
         }
       ],
       "guestGames": [
