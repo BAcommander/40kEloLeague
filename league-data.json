@@ -1002,6 +1002,21 @@
           "faction": "Ultramarines",
           "disposition": "Take and Hold",
           "seq": 69
+        },
+        {
+          "id": "t-mwgvsrq9-dy9cw",
+          "date": "2026-11-14",
+          "tournament": "Speyhammer RTT Nov",
+          "player": "p-andrew",
+          "rounds": 3,
+          "wins": 2,
+          "draws": 0,
+          "losses": 1,
+          "vp": 236,
+          "sos": 0.55,
+          "faction": "Chaos Daemons",
+          "disposition": "Purge the Foe",
+          "seq": 70
         }
       ],
       "guestGames": [
