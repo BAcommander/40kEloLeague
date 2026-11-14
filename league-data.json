@@ -1032,6 +1032,21 @@
           "faction": "Adeptus Custodes",
           "disposition": "Take and Hold",
           "seq": 71
+        },
+        {
+          "id": "t-mwgvv1z9-h0ig8",
+          "date": "2026-11-14",
+          "tournament": "Speyhammer RTT Nov",
+          "player": "p-colin",
+          "rounds": 3,
+          "wins": 2,
+          "draws": 0,
+          "losses": 1,
+          "vp": 232,
+          "sos": 0.33,
+          "faction": "Death Guard",
+          "disposition": "Purge the Foe",
+          "seq": 72
         }
       ],
       "guestGames": [
