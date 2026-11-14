@@ -987,6 +987,21 @@
           "disposition": "Take and Hold",
           "enteredBy": "Allan",
           "seq": 66
+        },
+        {
+          "id": "t-mwgvr2wh-b42zc",
+          "date": "2026-11-14",
+          "tournament": "Speyhammer RTT Nov",
+          "player": "p-gav",
+          "rounds": 3,
+          "wins": 3,
+          "draws": 0,
+          "losses": 0,
+          "vp": 300,
+          "sos": 0.55,
+          "faction": "Ultramarines",
+          "disposition": "Take and Hold",
+          "seq": 69
         }
       ],
       "guestGames": [
